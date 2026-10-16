@@ -665,8 +665,10 @@ select.self { width: auto; padding: 2px 6px; }
     let errors;
     if (t.answer_widget === 'radio') errors = v.trim() === exp ? 0 : 9;
     else if (t.answer_widget === 'checkbox') {
+      // Спецификация ОГЭ 2027 (задания 14 и 16): символов в ответе больше требуемого — 0 баллов.
       const S = new Set(v), C = new Set(exp);
-      errors = Math.max([...S].filter(x => !C.has(x)).length, [...C].filter(x => !S.has(x)).length);
+      errors = S.size > C.size ? 9
+        : Math.max([...S].filter(x => !C.has(x)).length, [...C].filter(x => !S.has(x)).length);
     } else if (t.answer_slots) errors = positional(v, exp);
     else {
       const a = normText(v), b = normText(exp);
