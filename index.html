@@ -106,6 +106,13 @@ details.ans .ans-value, .ans-value { display: inline-block; margin-left: 8px; pa
 .opts.pick input { margin-top: 4px; flex: none; }
 .opts.pick label.right { background: var(--ok-bg); }
 .opts.pick label.wrong { background: var(--bad-bg); }
+.opts-inline { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 14px; color: var(--muted); }
+.opts-inline label { display: inline-flex; gap: 4px; align-items: center; padding: 4px 10px; border: 1px solid var(--line);
+  border-radius: 6px; cursor: pointer; color: var(--ink); }
+.opts-inline label.right { background: var(--ok-bg); }
+.opts-inline label.wrong { background: var(--bad-bg); }
+.task img.demo-scan { display: block; max-width: 100%; height: auto; }
+.badge.demo { background: var(--accent-soft, var(--chip)); border: 1px solid var(--accent); color: var(--accent); }
 .answer-line { margin-top: 10px; font-size: 14px; color: var(--muted); }
 .answer-line .blank { display: inline-block; min-width: 110px; border-bottom: 1px solid var(--muted); margin: 0 6px; }
 .answer-line input.short { width: 160px; margin: 0 6px; color: var(--ink); }
@@ -237,6 +244,7 @@ select.self { width: auto; padding: 2px 6px; }
     <label class="check"><input type="checkbox" id="f-media"> только с рисунками</label>
     <label class="check"><input type="checkbox" id="f-text"> только к тексту</label>
     <label class="check"><input type="checkbox" id="f-answer"> только с ответом</label>
+    <label class="check"><input type="checkbox" id="f-demo"> из демоверсий ФИПИ</label>
     <label class="check"><input type="checkbox" id="f-lv"> для слабовидящих</label>
     <label class="check"><input type="checkbox" id="f-picked"> только подборка</label>
     <h3>Сортировка</h3>
@@ -338,7 +346,7 @@ select.self { width: auto; padding: 2px 6px; }
   };
   const state = {
     q: '', sections: new Set(), topic: '', types: new Set(), kims: new Set(), parts: new Set(), family: null,
-    media: false, text: false, lv: false, picked: false, answer: false, showAnswers: false, sort: 'kim', page: 1
+    media: false, text: false, lv: false, picked: false, answer: false, demo: false, showAnswers: false, sort: 'kim', page: 1
   };
   const picked = new Set(store.get('picked', []));
   let mode = 'bank';
@@ -407,16 +415,16 @@ select.self { width: auto; padding: 2px 6px; }
 
   $('q').oninput = e => { state.q = e.target.value.trim().toLowerCase(); state.page = 1; refresh(); };
   topicSel.onchange = e => { state.topic = e.target.value; state.page = 1; refresh(); };
-  ['media', 'text', 'lv', 'picked', 'answer'].forEach(k => { $('f-' + k).onchange = e => { state[k] = e.target.checked; state.page = 1; refresh(); }; });
+  ['media', 'text', 'lv', 'picked', 'answer', 'demo'].forEach(k => { $('f-' + k).onchange = e => { state[k] = e.target.checked; state.page = 1; refresh(); }; });
   $('show-answers').onchange = e => { state.showAnswers = e.target.checked; renderBank(); };
   $('sort').onchange = e => { state.sort = e.target.value; refresh(); };
   $('toggle').onclick = () => $('filters').classList.toggle('open');
   $('reset').onclick = () => {
-    Object.assign(state, { q: '', topic: '', family: null, media: false, text: false, lv: false, picked: false, answer: false, page: 1 });
+    Object.assign(state, { q: '', topic: '', family: null, media: false, text: false, lv: false, picked: false, answer: false, demo: false, page: 1 });
     ['sections', 'types', 'kims', 'parts'].forEach(k => state[k].clear());
     document.querySelectorAll('.chip.on').forEach(c => c.classList.remove('on'));
     $('q').value = ''; topicSel.value = '';
-    ['media', 'text', 'lv', 'picked', 'answer'].forEach(k => { $('f-' + k).checked = false; });
+    ['media', 'text', 'lv', 'picked', 'answer', 'demo'].forEach(k => { $('f-' + k).checked = false; });
     refresh();
   };
   function setLineFilter(line) {
@@ -445,6 +453,7 @@ select.self { width: auto; padding: 2px 6px; }
       (!state.text || t.text_id) &&
       (!state.lv || t.low_vision) &&
       (!state.answer || t.answer) &&
+      (!state.demo || (t.demo_refs && t.demo_refs.length)) &&
       (!state.picked || picked.has(t.id))
     );
     const cmp = {
@@ -462,8 +471,15 @@ select.self { width: auto; padding: 2px 6px; }
     if (!KIM.level[line]) return '';
     return `<span class="badge" title="Уровень сложности: ${LEVEL_NAME[KIM.level[line]]}; максимальный балл: ${maxOf(line)}">${KIM.level[line]} · ${maxOf(line)} б.</span>`;
   }
+  function demoBadge(t) {
+    if (!t.demo_refs || !t.demo_refs.length) return '';
+    const all = t.demo_refs.map(r => `${r.year} (№${r.number})`).join(', ');
+    const r = t.demo_refs[0];
+    const label = t.source === 'demo' ? `Демоверсия ${r.year} · №${r.number}` : `Было в демоверсии ${r.year}`;
+    return `<span class="badge demo" title="Демоверсии ОГЭ: ${esc(all)}">${esc(label)}${t.demo_refs.length > 1 ? ` +${t.demo_refs.length - 1}` : ''}</span>`;
+  }
   const kesBadges = t => t.kes.map(k => `<span class="badge kes" title="${esc(k.title)}">КЭС ${esc(k.code || '?')}</span>`).join('');
-  const optionsList = t => t.options.length
+  const optionsList = t => t.options.length && !t.scan
     ? `<ol class="opts">${t.options.map(o => `<li><b>${esc(o.n)})</b><div>${fixMedia(o.html)}</div></li>`).join('')}</ol>` : '';
   const slotsTable = (t, cells) => `<table class="slots"><tr>${t.answer_slots.map(s => `<td>${esc(s)}</td>`).join('')}</tr><tr>${cells}</tr></table>`;
   // Задания 17–22 в КИМ всегда с развёрнутым ответом, даже если в банке у них поле для краткого.
@@ -471,6 +487,7 @@ select.self { width: auto; padding: 2px 6px; }
 
   // Поле ответа для печати и просмотра.
   function staticAnswer(t, booklet) {
+    if (t.scan) return '';
     if (t.answer_slots) return `<div class="answer-line">Ответ: ${slotsTable(t, t.answer_slots.map(() => '<td></td>').join(''))}</div>`;
     if (!isExtended(t)) return `<div class="answer-line">Ответ:<span class="blank"></span>${t.answer_widget === 'text' && t.answer_unit ? esc(t.answer_unit) : ''}</div>`;
     return booklet ? '<div class="answer-line">Решение запишите на отдельном листе.</div>' : '';
@@ -481,6 +498,9 @@ select.self { width: auto; padding: 2px 6px; }
     let h;
     if (isExtended(t)) {
       h = optionsList(t) + '<div class="answer-line">Развёрнутый ответ: запишите решение на листе, затем сравните с критериями.</div>';
+    } else if ((w === 'radio' || w === 'checkbox') && t.options.length && t.scan) {
+      h = `<div class="opts-inline">Ответ: ${t.options.map(o => `<label data-n="${esc(o.n)}"><input type="${w}" name="${key}" value="${esc(o.n)}"><b>${esc(o.n)}</b></label>`).join('')}</div>`;
+      if (w === 'checkbox') h += '<div class="answer-line">Отметьте все верные варианты.</div>';
     } else if ((w === 'radio' || w === 'checkbox') && t.options.length) {
       h = `<ol class="opts pick">${t.options.map(o => `<li><label data-n="${esc(o.n)}"><input type="${w}" name="${key}" value="${esc(o.n)}"><b>${esc(o.n)})</b><div>${fixMedia(o.html)}</div></label></li>`).join('')}</ol>`;
       if (w === 'checkbox') h += '<div class="answer-line">Отметьте все верные варианты.</div>';
@@ -505,7 +525,7 @@ select.self { width: auto; padding: 2px 6px; }
     return `<details class="ans"${open ? ' open' : ''}><summary>Показать ответ</summary><span class="ans-value">${esc(displayAnswer(t))}</span></details>`;
   }
   function criteriaHtml(t) {
-    let h = '';
+    let h = t.criteria_html ? fixMedia(t.criteria_html) : '';
     if (t.model_solution_html) h += `<div class="crit-h">Возможное решение</div><div class="model">${fixMedia(t.model_solution_html)}</div>`;
     if (t.criteria && t.criteria.length) {
       h += `<div class="scroll-x"><table class="grid"><thead><tr><th>Содержание критерия</th><th class="c">Баллы</th></tr></thead><tbody>${
@@ -538,6 +558,7 @@ select.self { width: auto; padding: 2px 6px; }
         ${levelBadge(t.line_number)}
         <span class="badge">${esc(TYPE_SHORT[t.answer_type] || t.answer_type)}</span>
         ${kesBadges(t)}
+        ${demoBadge(t)}
         ${t.low_vision ? '<span class="badge lv" title="Возможно использование для слабовидящих">👁</span>' : ''}
         <span class="grow"></span>
         ${others > 0 && state.family !== t.family_id ? `<a href="#bank" data-family="${esc(t.family_id)}" data-from="${esc(t.id)}">Похожие задания (${others})</a>` : ''}
@@ -615,6 +636,12 @@ select.self { width: auto; padding: 2px 6px; }
     const exp = expectedOf(t);
     const v = String(value ?? '');
     if (!v.trim()) return { status: 'empty', score: 0, max };
+    const alts = t.answer_alternatives && t.answer_alternatives.length > 1 && t.answer_widget !== 'checkbox'
+      ? t.answer_alternatives : null;
+    if (alts) {
+      const tries = alts.map(a => grade({ ...t, answer: a, answer_form: a, answer_alternatives: null }, value));
+      return tries.sort((a, b) => b.score - a.score)[0];
+    }
     let errors;
     if (t.answer_widget === 'radio') errors = v.trim() === exp ? 0 : 9;
     else if (t.answer_widget === 'checkbox') {
