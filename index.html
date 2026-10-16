@@ -246,6 +246,7 @@ select.self { width: auto; padding: 2px 6px; }
     <label class="check"><input type="checkbox" id="f-text"> только к тексту</label>
     <label class="check"><input type="checkbox" id="f-answer"> только с ответом</label>
     <label class="check"><input type="checkbox" id="f-demo"> из демоверсий ФИПИ</label>
+    <label class="check" title="Задания из сборников «ОГЭ. Физика. Типовые экзаменационные варианты» (Е. Е. Камзеева). Выключите, чтобы оставить только материалы ФИПИ — в списке, тренажёре, вариантах и экзамене."><input type="checkbox" id="f-books" checked> задания из сборников</label>
     <label class="check"><input type="checkbox" id="f-lv"> для слабовидящих</label>
     <label class="check"><input type="checkbox" id="f-picked"> только подборка</label>
     <h3>Сортировка</h3>
@@ -348,7 +349,8 @@ select.self { width: auto; padding: 2px 6px; }
   };
   const state = {
     q: '', sections: new Set(), topic: '', types: new Set(), kims: new Set(), parts: new Set(), family: null,
-    media: false, text: false, lv: false, picked: false, answer: false, demo: false, showAnswers: false, sort: 'kim', page: 1
+    media: false, text: false, lv: false, picked: false, answer: false, demo: false, showAnswers: false, sort: 'kim', page: 1,
+    books: store.get('books', true)
   };
   const picked = new Set(store.get('picked', []));
   let mode = 'bank';
@@ -373,7 +375,12 @@ select.self { width: auto; padding: 2px 6px; }
     else prompt(label, text);
   };
 
-  $('src').innerHTML = `Источник: <a href="${B.meta.source}" target="_blank" rel="noopener">открытый банк ФИПИ</a> · выгружено ${B.meta.fetched_at} · ${B.meta.count} заданий`;
+  {
+    const demos = B.tasks.some(t => t.source === 'demo'), books = B.tasks.some(t => t.source === 'book');
+    $('src').innerHTML = `Источник: <a href="${B.meta.source}" target="_blank" rel="noopener">открытый банк ФИПИ</a>` +
+      (demos ? ', демоверсии ФИПИ' : '') + (books ? ', сборники типовых вариантов Е. Е. Камзеевой' : '') +
+      ` · выгружено ${B.meta.fetched_at} · ${B.tasks.length} заданий`;
+  }
 
   // ------------------------------------------------------------------ фильтры
 
@@ -418,6 +425,8 @@ select.self { width: auto; padding: 2px 6px; }
   $('q').oninput = e => { state.q = e.target.value.trim().toLowerCase(); state.page = 1; refresh(); };
   topicSel.onchange = e => { state.topic = e.target.value; state.page = 1; refresh(); };
   ['media', 'text', 'lv', 'picked', 'answer', 'demo'].forEach(k => { $('f-' + k).onchange = e => { state[k] = e.target.checked; state.page = 1; refresh(); }; });
+  $('f-books').checked = state.books;
+  $('f-books').onchange = e => { state.books = e.target.checked; store.set('books', state.books); state.page = 1; refresh(); };
   $('show-answers').onchange = e => { state.showAnswers = e.target.checked; renderBank(); };
   $('sort').onchange = e => { state.sort = e.target.value; refresh(); };
   $('toggle').onclick = () => $('filters').classList.toggle('open');
@@ -439,12 +448,14 @@ select.self { width: auto; padding: 2px 6px; }
   $('copy-picked').onclick = () => copyText([...picked].join(', '), 'Номера заданий:');
 
   const kesKey = t => (t.kes_codes[0] || '9').split('.').map(x => x.padStart(3, '0')).join('.');
+  // Задания из сборников можно выключить целиком (переключатель «задания из сборников»).
+  const visible = t => state.books || t.source !== 'book';
   function filtered() {
     if (state.family) {
-      return B.tasks.filter(t => t.family_id === state.family).sort((a, b) => a.id.localeCompare(b.id));
+      return B.tasks.filter(t => visible(t) && t.family_id === state.family).sort((a, b) => a.id.localeCompare(b.id));
     }
     const q = state.q;
-    let list = B.tasks.filter(t =>
+    let list = B.tasks.filter(t => visible(t) &&
       (!q || t._search.includes(q)) &&
       (!state.sections.size || t.kes_sections.some(s => state.sections.has(s.code))) &&
       (!state.topic || t.kes_codes.includes(state.topic)) &&
@@ -571,7 +582,7 @@ select.self { width: auto; padding: 2px 6px; }
         ${t.low_vision ? '<span class="badge lv" title="Возможно использование для слабовидящих">👁</span>' : ''}
         <span class="grow"></span>
         ${others > 0 && state.family !== t.family_id ? `<a href="#bank" data-family="${esc(t.family_id)}" data-from="${esc(t.id)}">Похожие задания (${others})</a>` : ''}
-        <a href="${esc(t.source_url)}" target="_blank" rel="noopener">ФИПИ</a>
+        ${t.source_url ? `<a href="${esc(t.source_url)}" target="_blank" rel="noopener">ФИПИ</a>` : '<span class="src-book">сборник</span>'}
         <label><input type="checkbox" data-pick="${esc(t.id)}" ${picked.has(t.id) ? 'checked' : ''}> в подборку</label>
       </div>
       ${textBlock(t, false)}
@@ -734,7 +745,7 @@ select.self { width: auto; padding: 2px 6px; }
   $('v-answered').checked = vopt.answered;
 
   function candidatesFor(line, onlyAnswered) {
-    let c = byLine[line] || [];
+    let c = (byLine[line] || []).filter(visible);
     if (state.sections.size) c = c.filter(t => t.kes_sections.some(s => state.sections.has(s.code)));
     if (line === 18) { const withText = c.filter(t => t.text_id); if (withText.length) c = withText; }
     if (onlyAnswered) { const a = c.filter(t => t.answer); if (a.length) c = a; }
