@@ -112,6 +112,7 @@ details.ans .ans-value, .ans-value { display: inline-block; margin-left: 8px; pa
 .opts-inline label.right { background: var(--ok-bg); }
 .opts-inline label.wrong { background: var(--bad-bg); }
 .task img.demo-scan { display: block; max-width: 100%; height: auto; }
+.badge.book { border: 1px dashed var(--line); }
 .badge.demo { background: var(--accent-soft, var(--chip)); border: 1px solid var(--accent); color: var(--accent); }
 .answer-line { margin-top: 10px; font-size: 14px; color: var(--muted); }
 .answer-line .blank { display: inline-block; min-width: 110px; border-bottom: 1px solid var(--muted); margin: 0 6px; }
@@ -333,7 +334,8 @@ select.self { width: auto; padding: 2px 6px; }
   const byId = {}, byUpper = {}, byLine = {}, familyCount = {};
   B.tasks.forEach((t, i) => {
     t._site = i;
-    t._search = (t.id + ' ' + t.content_text + ' ' + t.options.map(o => o.text).join(' ')).toLowerCase();
+    t._search = (t.id + ' ' + t.content_text + ' ' + t.options.map(o => o.text).join(' ') + ' ' +
+      (t.book_refs || []).map(r => `${r.book} в${r.variant} в.${r.variant} вариант ${r.variant}`).join(' ')).toLowerCase();
     byId[t.id] = t;
     byUpper[t.id.toUpperCase()] = t;
     (byLine[t.line_number] = byLine[t.line_number] || []).push(t);
@@ -471,6 +473,12 @@ select.self { width: auto; padding: 2px 6px; }
     if (!KIM.level[line]) return '';
     return `<span class="badge" title="Уровень сложности: ${LEVEL_NAME[KIM.level[line]]}; максимальный балл: ${maxOf(line)}">${KIM.level[line]} · ${maxOf(line)} б.</span>`;
   }
+  function bookBadge(t) {
+    if (!t.book_refs || !t.book_refs.length) return '';
+    const all = t.book_refs.map(r => `${r.book}, вариант ${r.variant}, задание ${r.number}`).join('; ');
+    const r = t.book_refs[0];
+    return `<span class="badge book" title="Есть в сборниках типовых вариантов: ${esc(all)}">${esc(r.book)} · в.${r.variant} №${r.number}${t.book_refs.length > 1 ? ` +${t.book_refs.length - 1}` : ''}</span>`;
+  }
   function demoBadge(t) {
     if (!t.demo_refs || !t.demo_refs.length) return '';
     const all = t.demo_refs.map(r => `${r.year} (№${r.number})`).join(', ');
@@ -559,6 +567,7 @@ select.self { width: auto; padding: 2px 6px; }
         <span class="badge">${esc(TYPE_SHORT[t.answer_type] || t.answer_type)}</span>
         ${kesBadges(t)}
         ${demoBadge(t)}
+        ${bookBadge(t)}
         ${t.low_vision ? '<span class="badge lv" title="Возможно использование для слабовидящих">👁</span>' : ''}
         <span class="grow"></span>
         ${others > 0 && state.family !== t.family_id ? `<a href="#bank" data-family="${esc(t.family_id)}" data-from="${esc(t.id)}">Похожие задания (${others})</a>` : ''}
