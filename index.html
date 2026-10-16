@@ -1,0 +1,1144 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Банк ОГЭ: физика</title>
+<style>
+:root {
+  --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1d1b; --muted: #6b6a64; --line: #e3e1da;
+  --accent: #2f5d8a; --accent-ink: #ffffff; --chip: #eeece6; --chip-on: #2f5d8a;
+  --warn: #8a5a00; --task-bg: #fffdf3; --shadow: 0 1px 2px rgba(0,0,0,.06);
+  --ok: #1f7a3a; --ok-bg: #e3f3e7; --bad: #b3261e; --bad-bg: #fbe6e4; --part: #8a5a00; --part-bg: #fbf0d9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141413; --panel: #1e1e1c; --ink: #ecebe6; --muted: #a3a29b; --line: #34332f;
+    --accent: #7fb0e0; --accent-ink: #10202f; --chip: #2a2a27; --chip-on: #7fb0e0;
+    --warn: #e0b060; --task-bg: #22221f; --shadow: none;
+    --ok: #7fd49a; --ok-bg: #1d3324; --bad: #f2948c; --bad-bg: #3a1f1d; --part: #e0b060; --part-bg: #3a2f17;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141413; --panel: #1e1e1c; --ink: #ecebe6; --muted: #a3a29b; --line: #34332f;
+  --accent: #7fb0e0; --accent-ink: #10202f; --chip: #2a2a27; --chip-on: #7fb0e0;
+  --warn: #e0b060; --task-bg: #22221f; --shadow: none;
+  --ok: #7fd49a; --ok-bg: #1d3324; --bad: #f2948c; --bad-bg: #3a1f1d; --part: #e0b060; --part-bg: #3a2f17;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+header.top { padding: 16px 20px 8px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; }
+header.top h1 { font-size: 20px; margin: 0; }
+header.top .src { color: var(--muted); font-size: 13px; }
+header.top .src a { color: inherit; }
+nav.modes { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 12px; }
+nav.modes a { text-decoration: none; color: var(--ink); border: 1px solid var(--line); background: var(--panel); border-radius: 8px;
+  padding: 6px 12px; font-size: 14px; }
+nav.modes a.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.layout { display: grid; grid-template-columns: 300px 1fr; gap: 16px; padding: 0 20px 40px; }
+body.focus .layout { grid-template-columns: 1fr; }
+body.focus aside, body.focus .filters-toggle { display: none !important; }
+aside { position: sticky; top: 12px; align-self: start; max-height: calc(100vh - 24px); overflow: auto;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; box-shadow: var(--shadow); }
+aside h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 14px 0 6px; }
+aside h3:first-child { margin-top: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { border: 1px solid var(--line); background: var(--chip); color: var(--ink); border-radius: 999px; padding: 3px 9px;
+  font-size: 13px; cursor: pointer; user-select: none; line-height: 1.4; }
+.chip small { color: var(--muted); margin-left: 3px; }
+.chip.on { background: var(--chip-on); color: var(--accent-ink); border-color: var(--chip-on); }
+.chip.on small { color: inherit; opacity: .8; }
+.chip.kim { min-width: 34px; text-align: center; padding: 3px 6px; }
+select, input[type=search], input.short { width: 100%; font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--panel); color: var(--ink); }
+label.check { display: flex; gap: 6px; align-items: center; font-size: 14px; margin: 4px 0; cursor: pointer; }
+.btn { font: inherit; font-size: 13px; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--chip);
+  color: var(--ink); cursor: pointer; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.small { font-size: 12px; padding: 2px 8px; }
+.btn:disabled { opacity: .5; cursor: default; }
+.row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.note { font-size: 12px; color: var(--muted); margin-top: 6px; }
+main { min-width: 0; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-bottom: 10px; }
+.toolbar .count { font-weight: 600; }
+.toolbar .spacer { flex: 1; }
+.toolbar label.check { margin: 0; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; box-shadow: var(--shadow); }
+.panel h2 { font-size: 18px; margin: 0 0 8px; }
+.panel h3 { font-size: 15px; margin: 14px 0 6px; }
+.panel p { margin: 0 0 8px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 14px; box-shadow: var(--shadow); overflow: hidden; }
+.card-head { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.badge { border-radius: 5px; padding: 1px 7px; background: var(--chip); white-space: nowrap; }
+.badge.kim { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.badge.na { color: var(--warn); }
+.badge.done { color: var(--ok); }
+details.ans { margin-top: 10px; font-size: 14px; }
+details.ans summary { cursor: pointer; color: var(--accent); display: inline-block; }
+details.ans .ans-value, .ans-value { display: inline-block; margin-left: 8px; padding: 2px 10px; border-radius: 5px;
+  background: var(--chip); font-weight: 600; letter-spacing: .04em; }
+.badge.kes { cursor: help; }
+.badge.lv { color: var(--warn); }
+.card-head .id { font-family: ui-monospace, Menlo, monospace; font-weight: 600; }
+.card-head .grow { flex: 1; }
+.card-head a { color: var(--muted); }
+.card-head label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.card-head .num { font-size: 16px; font-weight: 700; min-width: 26px; height: 26px; border-radius: 6px; background: var(--accent);
+  color: var(--accent-ink); display: inline-flex; align-items: center; justify-content: center; padding: 0 6px; }
+.card-head .ltitle { color: var(--muted); }
+.task { padding: 12px 16px; background: var(--task-bg); overflow-x: auto; }
+.task .hint { color: var(--muted); font-style: italic; margin-bottom: 6px; font-size: 14px; }
+.task p { margin: 0 0 4px; }
+.task img { max-width: 100%; height: auto; background: #fff; border-radius: 3px; vertical-align: middle; }
+.task table { border-collapse: collapse; }
+.task table[border="1"] td, .task table[border="1"] th { border: 1px solid var(--muted); padding: 2px 6px; }
+.task td { vertical-align: top; }
+.task math { font-size: 1.08em; }
+.opts { margin: 10px 0 0; padding: 0; list-style: none; }
+.opts li { display: flex; gap: 8px; padding: 3px 0; }
+.opts li b { min-width: 22px; }
+.opts.pick li { padding: 0; }
+.opts.pick label { display: flex; gap: 8px; align-items: flex-start; padding: 5px 8px; margin: 2px 0; border-radius: 6px; cursor: pointer;
+  border: 1px solid transparent; width: 100%; }
+.opts.pick label:hover { border-color: var(--line); }
+.opts.pick input { margin-top: 4px; flex: none; }
+.opts.pick label.right { background: var(--ok-bg); }
+.opts.pick label.wrong { background: var(--bad-bg); }
+.answer-line { margin-top: 10px; font-size: 14px; color: var(--muted); }
+.answer-line .blank { display: inline-block; min-width: 110px; border-bottom: 1px solid var(--muted); margin: 0 6px; }
+.answer-line input.short { width: 160px; margin: 0 6px; color: var(--ink); }
+.slots { display: inline-table; border-collapse: collapse; margin-left: 6px; vertical-align: middle; }
+.slots td { border: 1px solid var(--muted); min-width: 30px; height: 26px; text-align: center; padding: 0 4px; }
+.slots input.slot { width: 30px; height: 30px; border: 0; background: transparent; color: var(--ink); font: inherit; font-weight: 600;
+  text-align: center; padding: 0; }
+.slots td.right { background: var(--ok-bg); }
+.slots td.wrong { background: var(--bad-bg); }
+details.text { border-bottom: 1px solid var(--line); background: var(--panel); }
+details.text summary { cursor: pointer; padding: 8px 14px; font-size: 14px; color: var(--accent); }
+details.text .task { background: var(--panel); max-height: 520px; overflow: auto; }
+details.meta { padding: 0 14px 8px; font-size: 12px; color: var(--muted); }
+details.meta summary { cursor: pointer; padding-top: 8px; }
+details.meta pre { white-space: pre-wrap; word-break: break-word; max-height: 300px; overflow: auto; }
+details.crit { margin: 0; padding: 8px 16px 10px; border-top: 1px solid var(--line); font-size: 14px; }
+details.crit summary { cursor: pointer; color: var(--accent); }
+.crit-body { margin-top: 8px; overflow-x: auto; }
+.crit-h { font-weight: 600; margin: 6px 0 4px; }
+.crit-body p { margin: 0 0 4px; }
+.crit-body .model { padding: 8px 10px; border-left: 3px solid var(--line); margin-bottom: 8px; }
+.crit-body .model img { max-width: 100%; height: auto; background: #fff; }
+table.grid { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.grid th, table.grid td { border: 1px solid var(--line); padding: 4px 8px; text-align: left; vertical-align: top; }
+table.grid th { background: var(--chip); font-weight: 600; }
+table.grid td.c, table.grid th.c { text-align: center; white-space: nowrap; }
+table.grid tfoot td { font-weight: 600; }
+.scroll-x { overflow-x: auto; }
+.pager { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin: 16px 0; }
+.pager button { min-width: 34px; }
+.pager button.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.empty { padding: 40px; text-align: center; color: var(--muted); }
+.filters-toggle { display: none; }
+.family-chip { display: inline-flex; gap: 6px; align-items: center; }
+.part-h { font-size: 16px; margin: 18px 0 8px; }
+.part-h:first-child { margin-top: 0; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 16px; border-top: 1px solid var(--line); }
+.verdict { padding: 3px 10px; border-radius: 6px; font-weight: 600; font-size: 14px; }
+.verdict.ok { color: var(--ok); background: var(--ok-bg); }
+.verdict.partial { color: var(--part); background: var(--part-bg); }
+.verdict.wrong { color: var(--bad); background: var(--bad-bg); }
+.verdict.info { color: var(--muted); background: var(--chip); font-weight: 400; }
+.pts-ok { color: var(--ok); font-weight: 600; }
+.pts-part { color: var(--part); font-weight: 600; }
+.pts-bad { color: var(--bad); font-weight: 600; }
+.pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 6px; }
+.pcell { font: inherit; font-size: 12px; text-align: left; border: 1px solid var(--line); border-radius: 6px; background: var(--chip); color: var(--ink);
+  padding: 4px 6px 6px; cursor: pointer; position: relative; overflow: hidden; }
+.pcell b { display: block; font-size: 15px; }
+.pcell .bar, .tbar { display: block; height: 4px; border-radius: 2px; background: var(--line); margin-top: 3px; overflow: hidden; }
+.pcell .bar i, .tbar i { display: block; height: 100%; background: var(--ok); }
+.tbar { width: 80px; display: inline-block; vertical-align: middle; margin: 0 0 0 6px; }
+.exam-bar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 10px 14px;
+  margin-bottom: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
+.exam-bar .timer { font: 600 20px/1 ui-monospace, Menlo, monospace; }
+.exam-bar .timer.low { color: var(--bad); }
+.score-big { font-size: 28px; font-weight: 700; }
+select.self { width: auto; padding: 2px 6px; }
+.print-only { display: none; }
+.booklet-head .fio { display: flex; flex-wrap: wrap; gap: 6px 24px; margin: 10px 0; }
+.booklet-head .fio span { display: inline-block; min-width: 140px; border-bottom: 1px solid #000; }
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; padding: 0 16px 30px; }
+  header.top { padding: 12px 16px 6px; }
+  nav.modes { padding: 0 16px 10px; }
+  aside { position: static; max-height: none; display: none; }
+  aside.open { display: block; }
+  .filters-toggle { display: inline-block; }
+  .task { padding: 10px 12px; }
+  .card-head { padding: 8px 12px; }
+  details.crit, .actions { padding-left: 12px; padding-right: 12px; }
+}
+@page { margin: 14mm 12mm; }
+@media print {
+  header.top, nav.modes, aside, .toolbar, .pager, details.meta, .card-head label, .card-head a, .no-print, .exam-bar { display: none !important; }
+  body { background: #fff; color: #000; }
+  .layout { display: block; padding: 0; }
+  .card { break-inside: avoid; border: none; box-shadow: none; border-top: 1px solid #999; border-radius: 0; }
+  .task { background: #fff; overflow: visible; }
+  details.text[open] .task { max-height: none; overflow: visible; }
+  details.text summary { list-style: none; color: #000; }
+  details.text summary::-webkit-details-marker { display: none; }
+  details.ans:not([open]), details.ans summary, details.crit:not([open]) { display: none !important; }
+  details.ans .ans-value { margin-left: 0; }
+  details.ans[open]::before { content: "Ответ: "; }
+  .print-only { display: block; }
+  .panel { border: none; box-shadow: none; padding: 0; }
+  body.print-booklet details.ans, body.print-booklet details.crit, body.print-booklet #variant-key,
+  body.print-booklet #variant-info { display: none !important; }
+  body.print-booklet .card-head { border-bottom: none; padding: 10px 0 4px; }
+  body.print-booklet .card-head .num { background: none; color: #000; border: 1.5px solid #000; }
+  body.print-booklet .card-head .ltitle, body.print-booklet .card-head .badge { display: none; }
+  body.print-booklet .task { padding: 4px 0 10px; }
+  body.print-booklet .text-card { break-inside: auto; }
+  body.print-key #variant-list, body.print-key #variant-info, body.print-key .booklet-head { display: none !important; }
+  body.print-key #variant-key { display: block !important; }
+  table.grid th { background: #eee; }
+  table.grid th, table.grid td { border-color: #777; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Банк заданий ОГЭ по физике</h1>
+  <span class="src" id="src"></span>
+</header>
+<nav class="modes" id="modes">
+  <a href="#bank" data-mode="bank">Банк заданий</a>
+  <a href="#variant" data-mode="variant">Собрать вариант</a>
+  <a href="#trainer" data-mode="trainer">Тренажёр</a>
+  <a href="#exam" data-mode="exam">Экзамен</a>
+  <button class="btn filters-toggle" id="toggle">Фильтры</button>
+</nav>
+<div class="layout">
+  <aside id="filters">
+    <h3>Поиск</h3>
+    <input type="search" id="q" placeholder="Текст или номер задания (4D1B4F)">
+    <h3>Раздел КЭС</h3>
+    <div class="chips" id="f-section"></div>
+    <h3>Тема КЭС</h3>
+    <select id="f-topic"><option value="">Все темы</option></select>
+    <h3>Тип ответа (ФИПИ)</h3>
+    <div class="chips" id="f-type"></div>
+    <h3>Номер линии (задание КИМ)</h3>
+    <div class="chips" id="f-kim"></div>
+    <h3>Часть работы</h3>
+    <div class="chips" id="f-part"></div>
+    <h3>Прочее</h3>
+    <label class="check"><input type="checkbox" id="f-media"> только с рисунками</label>
+    <label class="check"><input type="checkbox" id="f-text"> только к тексту</label>
+    <label class="check"><input type="checkbox" id="f-answer"> только с ответом</label>
+    <label class="check"><input type="checkbox" id="f-lv"> для слабовидящих</label>
+    <label class="check"><input type="checkbox" id="f-picked"> только подборка</label>
+    <h3>Сортировка</h3>
+    <select id="sort">
+      <option value="kim">по номеру линии</option>
+      <option value="kes">по КЭС</option>
+      <option value="id">по номеру ФИПИ</option>
+      <option value="site">как на сайте ФИПИ</option>
+    </select>
+    <div class="row"><button class="btn" id="reset">Сбросить фильтры</button></div>
+    <p class="note" id="filters-note"></p>
+  </aside>
+  <main>
+    <section id="view-bank">
+      <div class="toolbar">
+        <span class="count" id="count"></span>
+        <span id="family-info"></span>
+        <span class="spacer"></span>
+        <label class="check"><input type="checkbox" id="show-answers"> показывать ответы</label>
+        <span id="picked-info"></span>
+        <button class="btn" id="copy-picked">Скопировать номера подборки</button>
+        <button class="btn" id="clear-picked">Очистить подборку</button>
+        <button class="btn primary" id="print">Печать</button>
+      </div>
+      <div id="list"></div>
+      <div class="pager" id="pager"></div>
+    </section>
+
+    <section id="view-variant" hidden>
+      <div class="toolbar">
+        <button class="btn primary" id="v-new">Новый вариант</button>
+        <label class="check"><input type="checkbox" id="v-answered"> только задания с ответами</label>
+        <label class="check"><input type="checkbox" id="v-show"> показывать ответы</label>
+        <span class="spacer"></span>
+        <button class="btn" id="v-link">Скопировать ссылку</button>
+        <button class="btn" id="v-exam">Решить как экзамен</button>
+        <button class="btn" id="v-print">Печать варианта</button>
+        <button class="btn" id="v-print-key">Печать ответов</button>
+      </div>
+      <div class="panel" id="variant-info"></div>
+      <div class="booklet-head print-only" id="booklet-head"></div>
+      <div id="variant-list"></div>
+      <div class="panel" id="variant-key" hidden></div>
+    </section>
+
+    <section id="view-trainer" hidden>
+      <div class="toolbar">
+        <span class="count" id="tr-count"></span>
+        <label class="check"><input type="checkbox" id="tr-unsolved" checked> сначала нерешённые</label>
+        <span class="spacer"></span>
+        <button class="btn" id="tr-progress-btn">Мой прогресс</button>
+        <button class="btn primary" id="tr-next">Следующее задание</button>
+      </div>
+      <div class="panel" id="tr-progress" hidden></div>
+      <div id="tr-card"></div>
+    </section>
+
+    <section id="view-exam" hidden>
+      <div id="exam"></div>
+    </section>
+  </main>
+</div>
+<script src="tasks.js"></script>
+<script>
+(function () {
+  const B = window.BANK;
+  if (!B) { document.getElementById('list').innerHTML = '<div class="empty">Не найден tasks.js — запустите: python scraper/fipi_bank.py viewer</div>'; return; }
+  const MEDIA = 'data/';
+  const PER_PAGE = 25;
+  const LINES = Array.from({ length: 22 }, (_, i) => i + 1);
+  const KIM = {
+    plan: B.meta.kim_plan || {}, level: B.meta.kim_level || {}, max: B.meta.kim_max_score || {},
+    duration: (B.meta.kim_duration_min || 180) * 60000
+  };
+  const LEVEL_NAME = { 'Б': 'базовый', 'П': 'повышенный', 'В': 'высокий' };
+  const maxOf = line => KIM.max[line] || 1;
+  const TYPE_ORDER = ['Выбор ответа из предложенных вариантов', 'Выбор ответов из предложенных вариантов', 'Краткий ответ',
+    'Установление соответствия', 'Расстановка терминов', 'Развернутый ответ'];
+  const TYPE_SHORT = {
+    'Выбор ответа из предложенных вариантов': 'Выбор одного', 'Выбор ответов из предложенных вариантов': 'Выбор нескольких',
+    'Краткий ответ': 'Краткий ответ', 'Установление соответствия': 'Соответствие', 'Расстановка терминов': 'Вставка терминов',
+    'Развернутый ответ': 'Развёрнутый ответ'
+  };
+  const kesTitle = {};
+  B.kes.forEach(s => { kesTitle[s.code] = s.title; s.topics.forEach(t => { kesTitle[t.code] = t.title; }); });
+  const byId = {}, byUpper = {}, byLine = {}, familyCount = {};
+  B.tasks.forEach((t, i) => {
+    t._site = i;
+    t._search = (t.id + ' ' + t.content_text + ' ' + t.options.map(o => o.text).join(' ')).toLowerCase();
+    byId[t.id] = t;
+    byUpper[t.id.toUpperCase()] = t;
+    (byLine[t.line_number] = byLine[t.line_number] || []).push(t);
+    if (t.family_id) familyCount[t.family_id] = (familyCount[t.family_id] || 0) + 1;
+  });
+
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('oge-phys:' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem('oge-phys:' + k, JSON.stringify(v)); } catch (e) { /* без хранилища — только в памяти */ } }
+  };
+  const state = {
+    q: '', sections: new Set(), topic: '', types: new Set(), kims: new Set(), parts: new Set(), family: null,
+    media: false, text: false, lv: false, picked: false, answer: false, showAnswers: false, sort: 'kim', page: 1
+  };
+  const picked = new Set(store.get('picked', []));
+  let mode = 'bank';
+
+  const $ = id => document.getElementById(id);
+  // Номера заданий ФИПИ бывают в разном регистре (5A0eF8); в ссылках регистр не важен.
+  const canonId = s => { s = s.trim(); return s && byUpper[s.toUpperCase()] ? byUpper[s.toUpperCase()].id : s; };
+  const idsFromArg = arg => { const ids = arg.split(',').map(canonId); while (ids.length < 22) ids.push(''); return ids.slice(0, 22); };
+  const fixMedia = html => (html || '').replace(/(src|href|data-full|data-alt)="media\//g, `$1="${MEDIA}media/`);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // Тексты критериев могут быть простым текстом или HTML (формулы, индексы).
+  const HTML_TAG = /<\/?(p|br|b|i|u|em|strong|sub|sup|span|div|math|img|table|ul|ol|li)\b/i;
+  const rich = s => HTML_TAG.test(String(s ?? '')) ? fixMedia(String(s)) : esc(s ?? '').replace(/\n/g, '<br>');
+  const plural = (n, one, few, many) => {
+    const a = Math.abs(n) % 100, b = a % 10;
+    return a > 10 && a < 20 ? many : b === 1 ? one : b >= 2 && b <= 4 ? few : many;
+  };
+  const balls = n => `${n} ${plural(n, 'балл', 'балла', 'баллов')}`;
+  const shuffle1 = arr => arr[Math.floor(Math.random() * arr.length)];
+  const copyText = (text, label) => {
+    if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => prompt(label, text));
+    else prompt(label, text);
+  };
+
+  $('src').innerHTML = `Источник: <a href="${B.meta.source}" target="_blank" rel="noopener">открытый банк ФИПИ</a> · выгружено ${B.meta.fetched_at} · ${B.meta.count} заданий`;
+
+  // ------------------------------------------------------------------ фильтры
+
+  function count(pred) { return B.tasks.filter(pred).length; }
+  function chip(container, value, label, n, set, extraClass) {
+    const el = document.createElement('span');
+    el.className = 'chip' + (extraClass ? ' ' + extraClass : '');
+    el.innerHTML = `${label}${n != null ? `<small>${n}</small>` : ''}`;
+    el.onclick = () => { set.has(value) ? set.delete(value) : set.add(value); el.classList.toggle('on'); state.page = 1; refresh(); };
+    el.dataset.value = value;
+    container.appendChild(el);
+  }
+  B.kes.forEach(s => chip($('f-section'), s.code, `${s.code}. ${s.title.charAt(0) + s.title.slice(1).toLowerCase()}`,
+    count(t => t.kes_sections.some(x => x.code === s.code)), state.sections));
+  TYPE_ORDER.forEach(ty => chip($('f-type'), ty, TYPE_SHORT[ty], count(t => t.answer_type === ty), state.types));
+  for (const k of LINES) {
+    const n = count(t => t.line_number === k);
+    chip($('f-kim'), k, String(k), null, state.kims, 'kim');
+    $('f-kim').lastChild.title = `${KIM.plan[k]} — уровень: ${LEVEL_NAME[KIM.level[k]] || '?'}, макс. ${balls(maxOf(k))}; заданий: ${n}`;
+    if (!n) $('f-kim').lastChild.style.opacity = .45;
+  }
+  chip($('f-part'), 1, 'Краткий ответ (1–16)', count(t => t.part === 1), state.parts);
+  chip($('f-part'), 2, 'Развёрнутый (17–22)', count(t => t.part === 2), state.parts);
+
+  const topicSel = $('f-topic');
+  B.kes.forEach(s => {
+    const g = document.createElement('optgroup');
+    g.label = `${s.code} ${s.title}`;
+    const all = document.createElement('option');
+    all.value = s.code; all.textContent = `${s.code} — весь раздел (${count(t => t.kes_codes.includes(s.code))} без темы)`;
+    g.appendChild(all);
+    s.topics.forEach(tp => {
+      const n = count(t => t.kes_codes.includes(tp.code));
+      const o = document.createElement('option');
+      o.value = tp.code; o.textContent = `${tp.code} ${tp.title.slice(0, 90)}${tp.title.length > 90 ? '…' : ''} (${n})`;
+      if (!n) o.disabled = true;
+      g.appendChild(o);
+    });
+    topicSel.appendChild(g);
+  });
+
+  $('q').oninput = e => { state.q = e.target.value.trim().toLowerCase(); state.page = 1; refresh(); };
+  topicSel.onchange = e => { state.topic = e.target.value; state.page = 1; refresh(); };
+  ['media', 'text', 'lv', 'picked', 'answer'].forEach(k => { $('f-' + k).onchange = e => { state[k] = e.target.checked; state.page = 1; refresh(); }; });
+  $('show-answers').onchange = e => { state.showAnswers = e.target.checked; renderBank(); };
+  $('sort').onchange = e => { state.sort = e.target.value; refresh(); };
+  $('toggle').onclick = () => $('filters').classList.toggle('open');
+  $('reset').onclick = () => {
+    Object.assign(state, { q: '', topic: '', family: null, media: false, text: false, lv: false, picked: false, answer: false, page: 1 });
+    ['sections', 'types', 'kims', 'parts'].forEach(k => state[k].clear());
+    document.querySelectorAll('.chip.on').forEach(c => c.classList.remove('on'));
+    $('q').value = ''; topicSel.value = '';
+    ['media', 'text', 'lv', 'picked', 'answer'].forEach(k => { $('f-' + k).checked = false; });
+    refresh();
+  };
+  function setLineFilter(line) {
+    state.kims.clear();
+    if (line) state.kims.add(line);
+    $('f-kim').querySelectorAll('.chip').forEach(c => c.classList.toggle('on', +c.dataset.value === line));
+  }
+  $('print').onclick = () => window.print();
+  $('clear-picked').onclick = () => { picked.clear(); store.set('picked', []); renderBank(); };
+  $('copy-picked').onclick = () => copyText([...picked].join(', '), 'Номера заданий:');
+
+  const kesKey = t => (t.kes_codes[0] || '9').split('.').map(x => x.padStart(3, '0')).join('.');
+  function filtered() {
+    if (state.family) {
+      return B.tasks.filter(t => t.family_id === state.family).sort((a, b) => a.id.localeCompare(b.id));
+    }
+    const q = state.q;
+    let list = B.tasks.filter(t =>
+      (!q || t._search.includes(q)) &&
+      (!state.sections.size || t.kes_sections.some(s => state.sections.has(s.code))) &&
+      (!state.topic || t.kes_codes.includes(state.topic)) &&
+      (!state.types.size || state.types.has(t.answer_type)) &&
+      (!state.kims.size || state.kims.has(t.line_number)) &&
+      (!state.parts.size || state.parts.has(t.part)) &&
+      (!state.media || t.media.length) &&
+      (!state.text || t.text_id) &&
+      (!state.lv || t.low_vision) &&
+      (!state.answer || t.answer) &&
+      (!state.picked || picked.has(t.id))
+    );
+    const cmp = {
+      kim: (a, b) => (a.line_number || 99) - (b.line_number || 99) || kesKey(a).localeCompare(kesKey(b)),
+      kes: (a, b) => kesKey(a).localeCompare(kesKey(b)) || (a.line_number || 99) - (b.line_number || 99),
+      id: (a, b) => a.id.localeCompare(b.id),
+      site: (a, b) => a._site - b._site
+    }[state.sort];
+    return list.sort(cmp);
+  }
+
+  // ------------------------------------------------------------------ части карточки
+
+  function levelBadge(line) {
+    if (!KIM.level[line]) return '';
+    return `<span class="badge" title="Уровень сложности: ${LEVEL_NAME[KIM.level[line]]}; максимальный балл: ${maxOf(line)}">${KIM.level[line]} · ${maxOf(line)} б.</span>`;
+  }
+  const kesBadges = t => t.kes.map(k => `<span class="badge kes" title="${esc(k.title)}">КЭС ${esc(k.code || '?')}</span>`).join('');
+  const optionsList = t => t.options.length
+    ? `<ol class="opts">${t.options.map(o => `<li><b>${esc(o.n)})</b><div>${fixMedia(o.html)}</div></li>`).join('')}</ol>` : '';
+  const slotsTable = (t, cells) => `<table class="slots"><tr>${t.answer_slots.map(s => `<td>${esc(s)}</td>`).join('')}</tr><tr>${cells}</tr></table>`;
+  // Задания 17–22 в КИМ всегда с развёрнутым ответом, даже если в банке у них поле для краткого.
+  const isExtended = t => t.line_number >= 17 || !['radio', 'checkbox', 'text', 'table'].includes(t.answer_widget);
+
+  // Поле ответа для печати и просмотра.
+  function staticAnswer(t, booklet) {
+    if (t.answer_slots) return `<div class="answer-line">Ответ: ${slotsTable(t, t.answer_slots.map(() => '<td></td>').join(''))}</div>`;
+    if (!isExtended(t)) return `<div class="answer-line">Ответ:<span class="blank"></span>${t.answer_widget === 'text' && t.answer_unit ? esc(t.answer_unit) : ''}</div>`;
+    return booklet ? '<div class="answer-line">Решение запишите на отдельном листе.</div>' : '';
+  }
+  // Поле ответа в тренажёре и экзамене.
+  function inputAnswer(t, key) {
+    const w = t.answer_widget;
+    let h;
+    if (isExtended(t)) {
+      h = optionsList(t) + '<div class="answer-line">Развёрнутый ответ: запишите решение на листе, затем сравните с критериями.</div>';
+    } else if ((w === 'radio' || w === 'checkbox') && t.options.length) {
+      h = `<ol class="opts pick">${t.options.map(o => `<li><label data-n="${esc(o.n)}"><input type="${w}" name="${key}" value="${esc(o.n)}"><b>${esc(o.n)})</b><div>${fixMedia(o.html)}</div></label></li>`).join('')}</ol>`;
+      if (w === 'checkbox') h += '<div class="answer-line">Отметьте все верные варианты.</div>';
+    } else if (t.answer_slots) {
+      h = `<div class="answer-line">Ответ: ${slotsTable(t, t.answer_slots.map((s, i) => `<td data-i="${i}"><input class="slot" maxlength="1" inputmode="numeric" autocomplete="off" aria-label="${esc(s)}"></td>`).join(''))}</div>`;
+    } else {
+      h = `<div class="answer-line">Ответ: <input type="text" class="short" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Ответ">${t.answer_unit ? esc(t.answer_unit) : ''}</div>`;
+    }
+    return `<div class="ans-input" data-id="${esc(t.id)}">${h}</div>`;
+  }
+  function taskBody(t, how) {
+    let body = `<div class="hint">${esc(t.hint)}</div>${fixMedia(t.content_html)}`;
+    if (how.input) return body + inputAnswer(t, how.input);
+    return body + optionsList(t) + staticAnswer(t, how.booklet);
+  }
+  function displayAnswer(t) {
+    if (!t.answer) return '';
+    return t.answer + (t.answer_widget === 'text' && t.answer_unit ? ' ' + t.answer_unit : '');
+  }
+  function answerReveal(t, open) {
+    if (!t.answer) return '';
+    return `<details class="ans"${open ? ' open' : ''}><summary>Показать ответ</summary><span class="ans-value">${esc(displayAnswer(t))}</span></details>`;
+  }
+  function criteriaHtml(t) {
+    let h = '';
+    if (t.model_solution_html) h += `<div class="crit-h">Возможное решение</div><div class="model">${fixMedia(t.model_solution_html)}</div>`;
+    if (t.criteria && t.criteria.length) {
+      h += `<div class="scroll-x"><table class="grid"><thead><tr><th>Содержание критерия</th><th class="c">Баллы</th></tr></thead><tbody>${
+        t.criteria.map(c => `<tr><td>${rich(c.text)}</td><td class="c">${esc(c.points)}</td></tr>`).join('')
+      }</tbody><tfoot><tr><td>Максимальный балл</td><td class="c">${esc(t.max_points ?? maxOf(t.line_number))}</td></tr></tfoot></table></div>`;
+    }
+    if (t.criteria_note) h += `<p class="note">${rich(t.criteria_note)}</p>`;
+    return h;
+  }
+  function criteriaBlock(t, open) {
+    const h = criteriaHtml(t);
+    return h ? `<details class="crit"${open ? ' open' : ''}><summary>Критерии оценивания</summary><div class="crit-body">${h}</div></details>` : '';
+  }
+  function textBlock(t, open, lead) {
+    const x = t.text_id && B.texts[t.text_id];
+    if (!x) return '';
+    return `<details class="text"${open ? ' open' : ''}><summary>${lead || 'Текст к заданию'}: «${esc(x.title || 'текст')}»</summary><div class="task">${fixMedia(x.html)}</div></details>`;
+  }
+
+  // ------------------------------------------------------------------ банк
+
+  function card(t) {
+    const kimTitle = KIM.plan[t.line_number] || '';
+    const others = t.family_id ? (familyCount[t.family_id] || 1) - 1 : 0;
+    const meta = Object.assign({}, t); delete meta.content_html; delete meta._search; delete meta._site;
+    return `<article class="card">
+      <div class="card-head">
+        <span class="id">${esc(t.id)}</span>
+        <span class="badge kim" title="${esc(kimTitle)}">Линия ${t.line_number ?? '?'}</span>
+        ${levelBadge(t.line_number)}
+        <span class="badge">${esc(TYPE_SHORT[t.answer_type] || t.answer_type)}</span>
+        ${kesBadges(t)}
+        ${t.low_vision ? '<span class="badge lv" title="Возможно использование для слабовидящих">👁</span>' : ''}
+        <span class="grow"></span>
+        ${others > 0 && state.family !== t.family_id ? `<a href="#bank" data-family="${esc(t.family_id)}" data-from="${esc(t.id)}">Похожие задания (${others})</a>` : ''}
+        <a href="${esc(t.source_url)}" target="_blank" rel="noopener">ФИПИ</a>
+        <label><input type="checkbox" data-pick="${esc(t.id)}" ${picked.has(t.id) ? 'checked' : ''}> в подборку</label>
+      </div>
+      ${textBlock(t, false)}
+      <div class="task">${taskBody(t, {})}${answerReveal(t, state.showAnswers)}</div>
+      ${state.showAnswers ? criteriaBlock(t, false) : ''}
+      <details class="meta"><summary>Все данные задания</summary><pre>${esc(JSON.stringify(meta, null, 1))}</pre></details>
+    </article>`;
+  }
+
+  function renderBank() {
+    const list = filtered();
+    const pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
+    state.page = Math.min(state.page, pages);
+    const slice = list.slice((state.page - 1) * PER_PAGE, state.page * PER_PAGE);
+    $('count').textContent = `Найдено: ${list.length}`;
+    $('family-info').innerHTML = state.family
+      ? `<span class="family-chip">Похожие задания к ${esc(state.familyFrom || '')} — фильтры не действуют <button class="btn small" id="family-off">Вернуться к фильтрам</button></span>` : '';
+    if (state.family) $('family-off').onclick = () => { state.family = null; state.page = 1; renderBank(); };
+    $('picked-info').textContent = picked.size ? `В подборке: ${picked.size}` : '';
+    $('list').innerHTML = slice.length ? slice.map(card).join('') : '<div class="empty">Ничего не найдено</div>';
+    $('list').querySelectorAll('[data-pick]').forEach(cb => {
+      cb.onchange = () => { cb.checked ? picked.add(cb.dataset.pick) : picked.delete(cb.dataset.pick); store.set('picked', [...picked]); $('picked-info').textContent = picked.size ? `В подборке: ${picked.size}` : ''; };
+    });
+    $('list').querySelectorAll('[data-family]').forEach(a => {
+      a.onclick = e => { e.preventDefault(); state.family = a.dataset.family; state.familyFrom = a.dataset.from; state.page = 1; renderBank(); window.scrollTo(0, 0); };
+    });
+    const pg = $('pager');
+    pg.innerHTML = '';
+    if (pages > 1) {
+      const nums = new Set([1, pages]);
+      for (let i = state.page - 3; i <= state.page + 3; i++) if (i >= 1 && i <= pages) nums.add(i);
+      let prev = 0;
+      [...nums].sort((a, b) => a - b).forEach(n => {
+        if (n - prev > 1) { const s = document.createElement('span'); s.textContent = '…'; pg.appendChild(s); }
+        const b = document.createElement('button');
+        b.className = 'btn' + (n === state.page ? ' on' : '');
+        b.textContent = n;
+        b.onclick = () => { state.page = n; renderBank(); window.scrollTo(0, 0); };
+        pg.appendChild(b);
+        prev = n;
+      });
+    }
+  }
+
+  // ------------------------------------------------------------------ проверка ответов
+
+  const normText = s => String(s ?? '').replace(/[\s   ]+/g, '').replace(/[−–—]/g, '-')
+    .replace(/\./g, ',').replace(/^\+/, '').toLowerCase();
+  const asNumber = s => /^-?\d+(,\d+)?$/.test(s) ? parseFloat(s.replace(',', '.')) : NaN;
+  const positional = (a, b) => {
+    let e = Math.abs(a.length - b.length);
+    for (let i = 0; i < Math.min(a.length, b.length); i++) if (a[i] !== b[i]) e++;
+    return e;
+  };
+  function expectedOf(t) {
+    if (!t.answer) return null;
+    const form = t.answer_form || t.answer;
+    if (t.answer_widget === 'checkbox') {
+      if (/^[01]+$/.test(form) && form.length >= t.options.length) {
+        return [...form].map((c, i) => c === '1' ? String(i + 1) : '').join('');
+      }
+      return t.answer.replace(/\D/g, '').split('').sort().join('');
+    }
+    return form;
+  }
+  const canAuto = t => !isExtended(t) && expectedOf(t) != null;
+  // Ответ с одной ошибкой в задании на 2 балла даёт 1 балл.
+  function grade(t, value) {
+    const max = maxOf(t.line_number);
+    if (!canAuto(t)) return { status: 'na', score: 0, max };
+    const exp = expectedOf(t);
+    const v = String(value ?? '');
+    if (!v.trim()) return { status: 'empty', score: 0, max };
+    let errors;
+    if (t.answer_widget === 'radio') errors = v.trim() === exp ? 0 : 9;
+    else if (t.answer_widget === 'checkbox') {
+      const S = new Set(v), C = new Set(exp);
+      errors = Math.max([...S].filter(x => !C.has(x)).length, [...C].filter(x => !S.has(x)).length);
+    } else if (t.answer_slots) errors = positional(v, exp);
+    else {
+      const a = normText(v), b = normText(exp);
+      if (a === b || (/,/.test(a + b) && asNumber(a) === asNumber(b) && !isNaN(asNumber(a)))) errors = 0;
+      else if (max === 2 && /^\d+$/.test(a) && /^\d+$/.test(b)) errors = positional(a, b);
+      else errors = 9;
+    }
+    const score = errors === 0 ? max : max === 2 && errors === 1 ? 1 : 0;
+    return { status: errors === 0 ? 'ok' : score ? 'partial' : 'wrong', score, max };
+  }
+  function readAnswer(box, t) {
+    if (!box) return '';
+    const w = t.answer_widget;
+    if (w === 'radio') { const c = box.querySelector('input:checked'); return c ? c.value : ''; }
+    if (w === 'checkbox') return [...box.querySelectorAll('input:checked')].map(x => x.value).sort().join('');
+    if (t.answer_slots) {
+      const v = [...box.querySelectorAll('input.slot')].map(x => (x.value.trim() || ' ').slice(0, 1)).join('');
+      return v.trim() ? v : '';
+    }
+    const i = box.querySelector('input.short');
+    return i ? i.value : '';
+  }
+  function setAnswer(box, t, v) {
+    if (!box || !v) return;
+    const w = t.answer_widget;
+    if (w === 'radio' || w === 'checkbox') box.querySelectorAll('input').forEach(x => { x.checked = v.includes(x.value); });
+    else if (t.answer_slots) box.querySelectorAll('input.slot').forEach((x, i) => { x.value = (v[i] || '').trim(); });
+    else { const i = box.querySelector('input.short'); if (i) i.value = v; }
+  }
+  const showValue = (t, v) => !v ? '—' : t.answer_slots ? v.replace(/ /g, '·') : v;
+  function markAnswer(box, t) {
+    const exp = expectedOf(t);
+    if (!box || exp == null) return;
+    if (t.answer_widget === 'radio' || t.answer_widget === 'checkbox') {
+      box.querySelectorAll('label[data-n]').forEach(l => {
+        const right = exp.includes(l.dataset.n), chosen = l.querySelector('input').checked;
+        l.classList.toggle('right', right);
+        l.classList.toggle('wrong', chosen && !right);
+      });
+    } else if (t.answer_slots) {
+      box.querySelectorAll('td[data-i]').forEach(td => {
+        const ok = td.querySelector('input').value.trim() === exp[+td.dataset.i];
+        td.classList.toggle('right', ok); td.classList.toggle('wrong', !ok);
+      });
+    }
+  }
+  // Ввод в клетки: только цифра и переход к следующей клетке (до того, как ответ сохранится).
+  document.addEventListener('input', e => {
+    const x = e.target;
+    if (!x.classList || !x.classList.contains('slot')) return;
+    x.value = x.value.replace(/\D/g, '').slice(-1);
+    if (x.value) {
+      const all = [...x.closest('table').querySelectorAll('input.slot')];
+      const next = all[all.indexOf(x) + 1];
+      if (next) next.focus();
+    }
+  }, true);
+
+  // ------------------------------------------------------------------ прогресс (localStorage)
+
+  let progress = store.get('progress', {});
+  function record(t, status) {
+    const p = progress[t.id] || { n: 0, ok: false };
+    p.n++;
+    if (status === 'ok' || status === 'self-ok') p.ok = true;
+    p.last = status;
+    p.t = Date.now();
+    progress[t.id] = p;
+    store.set('progress', progress);
+  }
+
+  // ------------------------------------------------------------------ генератор вариантов
+
+  let variant = store.get('variant', null);
+  const vopt = { answered: !!store.get('v-answered', false), show: false };
+  $('v-answered').checked = vopt.answered;
+
+  function candidatesFor(line, onlyAnswered) {
+    let c = byLine[line] || [];
+    if (state.sections.size) c = c.filter(t => t.kes_sections.some(s => state.sections.has(s.code)));
+    if (line === 18) { const withText = c.filter(t => t.text_id); if (withText.length) c = withText; }
+    if (onlyAnswered) { const a = c.filter(t => t.answer); if (a.length) c = a; }
+    return c;
+  }
+  function pickFor(line, exclude) {
+    const c = candidatesFor(line, vopt.answered);
+    const rest = c.filter(t => t.id !== exclude);
+    return rest.length ? shuffle1(rest).id : c.length ? c[0].id : '';
+  }
+  function newVariantIds() { return LINES.map(l => pickFor(l)); }
+  function variantNo(ids) {
+    let h = 7;
+    for (const ch of ids.join(',')) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    return 10000 + h % 90000;
+  }
+  function saveVariant() {
+    store.set('variant', variant);
+    history.replaceState(null, '', '#variant=' + variant.ids.join(','));
+  }
+  const sectionsNote = () => state.sections.size
+    ? 'разделы КЭС: ' + [...state.sections].sort().map(c => `${c}. ${kesTitle[c].charAt(0) + kesTitle[c].slice(1).toLowerCase()}`).join('; ')
+    : 'разделы КЭС: все';
+  const variantTasks = ids => ids.map((id, i) => ({ line: i + 1, id, t: id ? byId[id] : null }));
+
+  function renderVariantInfo() {
+    if (!variant) return;
+    const items = variantTasks(variant.ids);
+    const present = items.filter(x => x.t);
+    const total = present.reduce((s, x) => s + maxOf(x.line), 0);
+    const skipped = items.filter(x => !x.id).map(x => x.line);
+    const missing = items.filter(x => x.id && !x.t);
+    $('variant-info').innerHTML = `<h2>Вариант № ${variantNo(variant.ids)}</h2>
+      <p>Заданий: ${present.length} · максимум ${balls(total)} · время выполнения — ${KIM.duration / 3600000} ч.</p>
+      <p class="note">Новые варианты собираются с учётом фильтров слева: ${esc(sectionsNote())}${vopt.answered ? '; по возможности задания с ответами' : ''}.</p>
+      ${skipped.length ? `<p class="note">Нет заданий по выбранным разделам для линий: ${skipped.join(', ')} — они пропущены.</p>` : ''}
+      ${missing.length ? `<p class="note">Не найдены в банке: ${missing.map(x => `${esc(x.id)} (задание ${x.line})`).join(', ')} — замените их.</p>` : ''}`;
+  }
+  function variantCard(x) {
+    const { line, t } = x;
+    const head = `<div class="card-head">
+        <span class="num">${line}</span>
+        <span class="ltitle">${esc(KIM.plan[line] || '')}</span>
+        ${levelBadge(line)}
+        <span class="grow"></span>
+        ${t ? `<span class="badge no-print">ФИПИ <span class="id">${esc(t.id)}</span></span>` : ''}
+        <button class="btn small no-print" data-reroll="${line}">Заменить</button>
+      </div>`;
+    if (!t) return `<article class="card">${head}<div class="task"><div class="empty">Задание не найдено — нажмите «Заменить».</div></div></article>`;
+    return `<article class="card">${head}
+      <div class="task">${taskBody(t, { booklet: true })}${answerReveal(t, vopt.show)}</div>
+      ${vopt.show ? criteriaBlock(t, false) : ''}
+    </article>`;
+  }
+  function readingText(t, numbers) {
+    const x = t && t.text_id && B.texts[t.text_id];
+    if (!x) return '';
+    return `<article class="card text-card"><details class="text" open><summary>Прочитайте текст и выполните задание ${numbers}: «${esc(x.title || 'текст')}»</summary><div class="task">${fixMedia(x.html)}</div></details></article>`;
+  }
+  function partHeading(line, sofar) {
+    const part = line <= 16 ? 1 : 2;
+    return sofar.includes(`data-part="${part}"`) ? '' : `<h2 class="part-h" data-part="${part}">Часть ${part}</h2>`;
+  }
+  function renderVariant() {
+    if (!variant || !Array.isArray(variant.ids) || variant.ids.length !== 22) { variant = { ids: newVariantIds() }; saveVariant(); }
+    renderVariantInfo();
+    const items = variantTasks(variant.ids);
+    const no = variantNo(variant.ids);
+    const total = items.filter(x => x.t).reduce((s, x) => s + maxOf(x.line), 0);
+    $('booklet-head').innerHTML = `<h2>ОГЭ по физике. Тренировочный вариант № ${no}</h2>
+      <div class="fio">Фамилия, имя <span></span> Класс <span style="min-width:60px"></span> Дата <span style="min-width:90px"></span></div>
+      <p>На выполнение работы отводится ${KIM.duration / 3600000} часа (${KIM.duration / 60000} минут). Работа состоит из двух частей.
+      Ответы к заданиям 1–16 запишите в поле ответа: цифру, последовательность цифр или число. Если в ответе указана единица
+      измерения, её писать не нужно. Задания 17–22 требуют развёрнутого ответа: запишите решение на отдельном листе, указав номер задания.
+      Максимальный балл за работу — ${total}.</p>`;
+    let html = '';
+    items.forEach(x => {
+      if (!x.id) return;
+      html += partHeading(x.line, html);
+      if (x.line === 18) html += readingText(x.t, 18);
+      html += variantCard(x);
+    });
+    $('variant-list').innerHTML = html || '<div class="empty">Нет заданий по выбранным разделам</div>';
+    $('variant-list').querySelectorAll('[data-reroll]').forEach(b => {
+      b.onclick = () => {
+        const line = +b.dataset.reroll;
+        const id = pickFor(line, variant.ids[line - 1]);
+        if (!id) { alert(`Для задания ${line} нет заданий по выбранным разделам.`); return; }
+        variant.ids[line - 1] = id;
+        saveVariant();
+        renderVariant();
+      };
+    });
+    renderKey(items, no, total);
+  }
+  function renderKey(items, no, total) {
+    const rows = items.filter(x => x.t).map(x => {
+      const t = x.t;
+      const ans = isExtended(t) || x.line >= 17 ? 'развёрнутый ответ' : t.answer ? esc(displayAnswer(t)) : '<span class="note">нет ответа в банке</span>';
+      return `<tr><td class="c">${x.line}</td><td class="c"><span class="id">${esc(t.id)}</span></td><td class="c">${esc(KIM.level[x.line] || '')}</td><td>${ans}</td><td class="c">${maxOf(x.line)}</td></tr>`;
+    }).join('');
+    const crit = items.filter(x => x.t && criteriaHtml(x.t)).map(x =>
+      `<h3>Задание ${x.line} (ФИПИ ${esc(x.t.id)}): критерии оценивания</h3><div class="crit-body">${criteriaHtml(x.t)}</div>`).join('');
+    $('variant-key').innerHTML = `<h2>Ответы к варианту № ${no}</h2>
+      <div class="scroll-x"><table class="grid"><thead><tr><th class="c">№</th><th class="c">Задание ФИПИ</th><th class="c">Уровень</th><th>Ответ</th><th class="c">Макс. балл</th></tr></thead>
+      <tbody>${rows}</tbody><tfoot><tr><td colspan="4">Итого</td><td class="c">${total}</td></tr></tfoot></table></div>
+      <p class="note">Задания на 2 балла: верный ответ — 2 балла, одна ошибка — 1 балл. Задания 17–22 оцениваются по критериям.</p>
+      ${crit}`;
+  }
+
+  $('v-new').onclick = () => { variant = { ids: newVariantIds() }; saveVariant(); renderVariant(); window.scrollTo(0, 0); };
+  $('v-answered').onchange = e => {
+    vopt.answered = e.target.checked; store.set('v-answered', vopt.answered);
+    variant = { ids: newVariantIds() }; saveVariant(); renderVariant();
+  };
+  $('v-show').onchange = e => { vopt.show = e.target.checked; $('variant-key').hidden = !vopt.show; renderVariant(); };
+  $('v-link').onclick = () => copyText(location.href.split('#')[0] + '#variant=' + variant.ids.join(','), 'Ссылка на вариант:');
+  $('v-exam').onclick = () => { examDraft = variant.ids.slice(); location.hash = '#exam'; };
+  function printAs(cls) {
+    document.body.classList.remove('print-booklet', 'print-key');
+    document.body.classList.add(cls);
+    window.print();
+  }
+  $('v-print').onclick = () => printAs('print-booklet');
+  $('v-print-key').onclick = () => printAs('print-key');
+  window.addEventListener('afterprint', () => document.body.classList.remove('print-booklet', 'print-key'));
+
+  // ------------------------------------------------------------------ тренажёр
+
+  const trainer = { id: null, recorded: false };
+  function pickTrainerTask() {
+    const pool = filtered().filter(t => t.id !== trainer.id);
+    if (!pool.length) return null;
+    let pref = pool;
+    if ($('tr-unsolved').checked) { const u = pool.filter(t => !(progress[t.id] && progress[t.id].ok)); if (u.length) pref = u; }
+    return shuffle1(pref);
+  }
+  function updateTrainerPool() {
+    const pool = filtered();
+    const auto = pool.filter(canAuto).length;
+    $('tr-count').textContent = `Заданий по фильтрам: ${pool.length}, с автопроверкой: ${auto}`;
+  }
+  function nextTrainer() {
+    const t = pickTrainerTask();
+    if (t) location.hash = '#trainer=' + t.id;
+    else $('tr-card').innerHTML = '<div class="empty">Нет заданий по выбранным фильтрам</div>';
+  }
+  function renderTrainer(id) {
+    updateTrainerPool();
+    let t = id && byId[id];
+    if (!t) {
+      t = pickTrainerTask();
+      if (!t) { $('tr-card').innerHTML = '<div class="empty">Нет заданий по выбранным фильтрам</div>'; return; }
+      history.replaceState(null, '', '#trainer=' + t.id);
+    }
+    trainer.id = t.id; trainer.recorded = false;
+    const auto = canAuto(t);
+    const p = progress[t.id];
+    $('tr-card').innerHTML = `<article class="card">
+      <div class="card-head">
+        <span class="badge kim" title="${esc(KIM.plan[t.line_number] || '')}">Задание ${t.line_number ?? '?'}</span>
+        ${levelBadge(t.line_number)}
+        ${kesBadges(t)}
+        ${auto ? '' : '<span class="badge na">без автопроверки</span>'}
+        ${p && p.ok ? '<span class="badge done">решено раньше</span>' : ''}
+        <span class="grow"></span>
+        <span class="id">${esc(t.id)}</span>
+      </div>
+      ${textBlock(t, true)}
+      <div class="task">${taskBody(t, { input: 'tr' })}</div>
+      <div class="actions" id="tr-actions">
+        ${auto ? '<button class="btn primary" id="tr-check">Проверить</button><button class="btn" id="tr-show">Показать ответ</button>'
+          : `<span class="verdict info">${isExtended(t) ? 'Развёрнутый ответ — оцените себя сами' : 'Ответа в банке пока нет'}${criteriaHtml(t) ? ' по критериям' : ''}</span>
+             ${criteriaHtml(t) ? '<button class="btn" id="tr-crit">Показать критерии</button>' : ''}
+             <button class="btn" data-self="ok">Справился(-ась)</button><button class="btn" data-self="no">Не справился(-ась)</button>`}
+        <span id="tr-verdict"></span>
+        <span class="grow" style="flex:1"></span>
+        <button class="btn" id="tr-skip">Следующее</button>
+      </div>
+      <div id="tr-crit-box"></div>
+    </article>`;
+    const box = $('tr-card').querySelector('.ans-input');
+    const showCrit = () => { $('tr-crit-box').innerHTML = criteriaBlock(t, true); };
+    $('tr-skip').onclick = nextTrainer;
+    if (auto) {
+      const check = () => {
+        const v = readAnswer(box, t);
+        const g = grade(t, v);
+        if (g.status === 'empty') { $('tr-verdict').innerHTML = '<span class="verdict info">Введите ответ</span>'; return; }
+        if (!trainer.recorded) { record(t, g.status); trainer.recorded = true; }
+        const right = `Правильный ответ: <span class="ans-value">${esc(displayAnswer(t))}</span>`;
+        $('tr-verdict').innerHTML = g.status === 'ok' ? `<span class="verdict ok">Верно! ${balls(g.score)} из ${g.max}</span>`
+          : g.status === 'partial' ? `<span class="verdict partial">Частично: ${balls(g.score)} из ${g.max}</span> ${right}`
+          : `<span class="verdict wrong">Неверно</span> ${right}`;
+        markAnswer(box, t);
+        showCrit();
+        if ($('tr-progress').hidden === false) renderProgress();
+      };
+      $('tr-check').onclick = check;
+      box.querySelectorAll('input.short, input.slot').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') check(); }));
+      $('tr-show').onclick = () => {
+        trainer.recorded = true;
+        $('tr-verdict').innerHTML = `Ответ: <span class="ans-value">${esc(displayAnswer(t))}</span>`;
+        showCrit();
+      };
+    } else {
+      if ($('tr-crit')) $('tr-crit').onclick = showCrit;
+      $('tr-actions').querySelectorAll('[data-self]').forEach(b => {
+        b.onclick = () => {
+          if (!trainer.recorded) { record(t, b.dataset.self === 'ok' ? 'self-ok' : 'self-no'); trainer.recorded = true; }
+          $('tr-verdict').innerHTML = '<span class="verdict info">Отмечено</span>';
+          if ($('tr-progress').hidden === false) renderProgress();
+        };
+      });
+    }
+  }
+  $('tr-next').onclick = nextTrainer;
+  $('tr-progress-btn').onclick = () => {
+    $('tr-progress').hidden = !$('tr-progress').hidden;
+    if (!$('tr-progress').hidden) renderProgress();
+  };
+
+  function stat(tasks) {
+    const att = tasks.filter(t => progress[t.id]);
+    return { total: tasks.length, att: att.length, ok: att.filter(t => progress[t.id].ok).length };
+  }
+  function renderProgress() {
+    const all = stat(B.tasks);
+    const cells = LINES.map(line => {
+      const s = stat(byLine[line] || []);
+      const pct = s.total ? Math.round(100 * s.ok / s.total) : 0;
+      return `<button class="pcell" data-line="${line}" title="Задание ${line}: ${esc(KIM.plan[line] || '')}. Решено ${s.ok} из ${s.total}, попробовано ${s.att}">
+        <b>${line}</b>${s.ok}/${s.att}<span class="bar"><i style="width:${pct}%"></i></span></button>`;
+    }).join('');
+    let topics = '';
+    B.kes.forEach(sec => {
+      const rows = [{ code: sec.code, title: 'весь раздел' }, ...sec.topics].map(tp => {
+        const s = stat(B.tasks.filter(t => t.kes_codes.includes(tp.code)));
+        if (!s.att) return '';
+        const pct = Math.round(100 * s.ok / s.att);
+        return `<tr><td>${esc(tp.code)}</td><td>${esc(tp.title)}</td><td class="c">${s.ok} из ${s.att}<span class="tbar"><i style="width:${pct}%"></i></span></td><td class="c">${s.total}</td></tr>`;
+      }).join('');
+      if (rows) topics += `<tr><th colspan="4">${esc(sec.code)}. ${esc(sec.title)}</th></tr>${rows}`;
+    });
+    $('tr-progress').innerHTML = `<h2>Мой прогресс</h2>
+      <p>Попробовано заданий: ${all.att} из ${all.total}, решено: ${all.ok}. Прогресс хранится только в этом браузере.</p>
+      <h3>По заданиям КИМ <span class="note">(решено / попробовано; нажмите, чтобы тренировать задание)</span></h3>
+      <div class="pgrid">${cells}</div>
+      <h3>По темам КЭС</h3>
+      ${topics ? `<div class="scroll-x"><table class="grid"><thead><tr><th>Код</th><th>Тема</th><th class="c">Решено</th><th class="c">Всего</th></tr></thead><tbody>${topics}</tbody></table></div>`
+        : '<p class="note">Пока нет решённых заданий.</p>'}
+      <div class="row"><button class="btn" id="tr-reset">Сбросить прогресс</button></div>`;
+    $('tr-progress').querySelectorAll('[data-line]').forEach(b => {
+      b.onclick = () => { state.family = null; setLineFilter(+b.dataset.line); nextTrainer(); };
+    });
+    $('tr-reset').onclick = () => {
+      if (!confirm('Удалить весь прогресс в этом браузере?')) return;
+      progress = {}; store.set('progress', progress); renderProgress();
+    };
+  }
+
+  // ------------------------------------------------------------------ экзамен
+
+  let exam = store.get('exam', null);
+  let examDraft = null;  // номера заданий варианта, по которому предложено начать экзамен
+  let examTimer = null;
+  let examView = null;  // 'start' | 'run' | 'result'
+  const saveExam = () => store.set('exam', exam);
+  const fmtTime = ms => {
+    const s = Math.max(0, Math.round(ms / 1000));
+    return `${Math.floor(s / 3600)}:${String(Math.floor(s / 60) % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  };
+  function startExam(ids) {
+    exam = { ids, start: Date.now(), end: null, answers: {}, self: {} };
+    saveExam();
+    examDraft = null;
+    history.replaceState(null, '', '#exam');
+    renderExam();
+    window.scrollTo(0, 0);
+  }
+  function examScores() {
+    return variantTasks(exam.ids).filter(x => x.t).map(x => {
+      const g = grade(x.t, exam.answers[x.line]);
+      const auto = g.status !== 'na';
+      return { ...x, g, auto, score: auto ? g.score : +(exam.self[x.line] || 0), max: maxOf(x.line) };
+    });
+  }
+  function finishExam() {
+    if (!exam || exam.end) return;
+    exam.end = Math.min(Date.now(), exam.start + KIM.duration);
+    examScores().forEach(x => { if (x.auto && x.g.status !== 'empty') record(x.t, x.g.status); });
+    saveExam();
+    renderExam();
+    window.scrollTo(0, 0);
+  }
+  function renderExam() {
+    clearInterval(examTimer);
+    const running = exam && !exam.end;
+    if (running && Date.now() - exam.start >= KIM.duration) { finishExam(); return; }
+    if (running) return renderExamRun();
+    if (exam && exam.end && !examDraft && examView !== 'start') return renderExamResult();
+    renderExamStart();
+  }
+  function renderExamStart() {
+    examView = 'start';
+    document.body.classList.remove('focus');
+    const draft = examDraft && examDraft.length === 22 ? examDraft : null;
+    $('exam').innerHTML = `<div class="panel">
+      <h2>Экзамен</h2>
+      <p>Вариант из 22 заданий в формате КИМ ОГЭ. На выполнение — ${KIM.duration / 3600000} часа, таймер идёт и после перезагрузки страницы.
+      Задания с ответом в банке проверяются автоматически; задания 17–22 и задания без автопроверки после завершения вы оцениваете сами.
+      Максимум — ${balls(Object.values(KIM.max).reduce((a, b) => a + b, 0))}.</p>
+      ${draft ? `<p>Будет использован вариант № ${variantNo(draft)}.</p>` : `<p class="note">Задания подбираются с учётом фильтров слева: ${esc(sectionsNote())}.</p>
+      <label class="check"><input type="checkbox" id="ex-answered" ${vopt.answered ? 'checked' : ''}> по возможности задания с ответами (больше автопроверки)</label>`}
+      <div class="row">
+        <button class="btn primary" id="ex-start">Начать экзамен</button>
+        ${draft ? '<button class="btn" id="ex-random">Взять случайный вариант</button>' : ''}
+        ${exam && exam.end ? '<button class="btn" id="ex-last">Результаты прошлого экзамена</button>' : ''}
+      </div>
+    </div>`;
+    $('ex-start').onclick = () => {
+      if (draft) return startExam(draft.slice());
+      vopt.answered = $('ex-answered').checked;
+      store.set('v-answered', vopt.answered); $('v-answered').checked = vopt.answered;
+      startExam(newVariantIds());
+    };
+    if ($('ex-random')) $('ex-random').onclick = () => { examDraft = null; renderExamStart(); };
+    if ($('ex-last')) $('ex-last').onclick = () => { examView = 'result'; renderExamResult(); };
+  }
+  function renderExamRun() {
+    examView = 'run';
+    document.body.classList.add('focus');
+    const items = variantTasks(exam.ids).filter(x => x.t);
+    let html = `<div class="exam-bar"><span class="timer" id="ex-timer"></span><span id="ex-done"></span>
+      <span class="spacer" style="flex:1"></span><button class="btn primary" id="ex-finish">Завершить экзамен</button></div>`;
+    items.forEach(x => {
+      html += partHeading(x.line, html);
+      if (x.line === 18) html += readingText(x.t, 18);
+      html += `<article class="card" data-line="${x.line}"><div class="card-head"><span class="num">${x.line}</span>${levelBadge(x.line)}</div>
+        <div class="task">${taskBody(x.t, { input: 'ex' + x.line })}</div></article>`;
+    });
+    html += '<div class="row"><button class="btn primary" id="ex-finish2">Завершить экзамен</button></div>';
+    $('exam').innerHTML = html;
+    $('exam').querySelectorAll('article[data-line]').forEach(a => {
+      const line = +a.dataset.line, t = byId[exam.ids[line - 1]], box = a.querySelector('.ans-input');
+      setAnswer(box, t, exam.answers[line]);
+      const save = () => { exam.answers[line] = readAnswer(box, t); saveExam(); updateDone(); };
+      box.addEventListener('input', save);
+      box.addEventListener('change', save);
+    });
+    const autoItems = items.filter(x => !isExtended(x.t));
+    const updateDone = () => { $('ex-done').textContent = `Отвечено: ${autoItems.filter(x => (exam.answers[x.line] || '').trim()).length} из ${autoItems.length}`; };
+    const finish = () => { if (confirm('Завершить экзамен и посмотреть результат?')) finishExam(); };
+    $('ex-finish').onclick = finish; $('ex-finish2').onclick = finish;
+    const tick = () => {
+      if (!exam || exam.end) { clearInterval(examTimer); return; }
+      const left = exam.start + KIM.duration - Date.now();
+      if (left <= 0) { clearInterval(examTimer); alert('Время вышло. Экзамен завершён.'); finishExam(); return; }
+      $('ex-timer').textContent = fmtTime(left);
+      $('ex-timer').classList.toggle('low', left < 10 * 60000);
+    };
+    updateDone(); tick();
+    examTimer = setInterval(tick, 1000);
+  }
+  function renderExamResult() {
+    examView = 'result';
+    document.body.classList.add('focus');
+    const rows = examScores();
+    const sum = () => rows.reduce((s, x) => s + (x.auto ? x.score : +(exam.self[x.line] || 0)), 0);
+    const maxSum = rows.reduce((s, x) => s + x.max, 0);
+    const cls = x => x.score === x.max ? 'pts-ok' : x.score > 0 ? 'pts-part' : 'pts-bad';
+    const table = rows.map(x => {
+      const pts = x.auto ? `<span class="${cls(x)}">${x.score}</span>`
+        : `<select class="self" data-self="${x.line}">${Array.from({ length: x.max + 1 }, (_, i) => `<option value="${i}"${+(exam.self[x.line] || 0) === i ? ' selected' : ''}>${i}</option>`).join('')}</select>`;
+      const right = x.auto ? esc(displayAnswer(x.t)) : isExtended(x.t) ? 'развёрнутый ответ' : '<span class="note">нет в банке</span>';
+      const mine = isExtended(x.t) ? '—' : esc(showValue(x.t, exam.answers[x.line]));
+      return `<tr><td class="c"><button class="btn small" data-goto="${x.line}">${x.line}</button></td><td>${mine}</td><td>${right}</td><td class="c">${pts}</td><td class="c">${x.max}</td></tr>`;
+    }).join('');
+    const cards = rows.map(x => `${x.line === 18 ? readingText(x.t, 18) : ''}<article class="card" id="ex-task-${x.line}">
+      <div class="card-head"><span class="num">${x.line}</span>${levelBadge(x.line)}<span class="grow"></span><span class="id">${esc(x.t.id)}</span>
+        ${x.auto ? `<span class="verdict ${x.g.status === 'empty' ? 'wrong' : x.g.status}">${x.g.status === 'ok' ? 'верно' : x.g.status === 'partial' ? 'частично' : x.g.status === 'empty' ? 'нет ответа' : 'неверно'}</span>` : '<span class="badge na">без автопроверки</span>'}</div>
+      <div class="task">${taskBody(x.t, {})}
+        ${isExtended(x.t) ? '' : `<div class="answer-line">Ваш ответ: <span class="ans-value">${esc(showValue(x.t, exam.answers[x.line]))}</span>${x.t.answer ? ` · верный: <span class="ans-value">${esc(displayAnswer(x.t))}</span>` : ''}</div>`}
+      </div>${criteriaBlock(x.t, false)}</article>`).join('');
+    $('exam').innerHTML = `<div class="panel">
+      <h2>Результат экзамена · вариант № ${variantNo(exam.ids)}</h2>
+      <p><span class="score-big" id="ex-sum"></span> из ${maxSum} · время: ${fmtTime(exam.end - exam.start)}</p>
+      <p class="note">Задания на 2 балла с одной ошибкой оцениваются в 1 балл. Задания без автопроверки оцените сами по критериям (выберите балл в таблице).</p>
+      <div class="scroll-x"><table class="grid"><thead><tr><th class="c">№</th><th>Ваш ответ</th><th>Верный ответ</th><th class="c">Баллы</th><th class="c">Макс.</th></tr></thead>
+      <tbody>${table}</tbody></table></div>
+      <div class="row"><button class="btn primary" id="ex-new">Новый экзамен</button></div>
+    </div>${cards}`;
+    const upd = () => { $('ex-sum').textContent = sum(); };
+    $('exam').querySelectorAll('select[data-self]').forEach(s => {
+      s.onchange = () => { exam.self[s.dataset.self] = +s.value; saveExam(); upd(); };
+    });
+    $('exam').querySelectorAll('[data-goto]').forEach(b => {
+      b.onclick = () => $('ex-task-' + b.dataset.goto).scrollIntoView({ behavior: 'smooth' });
+    });
+    $('ex-new').onclick = () => { examDraft = null; examView = 'start'; renderExamStart(); window.scrollTo(0, 0); };
+    upd();
+  }
+
+  // ------------------------------------------------------------------ режимы
+
+  function refresh() {
+    $('filters-note').textContent = mode === 'variant' ? 'Для вариантов учитываются только разделы КЭС.' : '';
+    if (mode === 'bank') renderBank();
+    else if (mode === 'trainer') updateTrainerPool();
+    else if (mode === 'variant') renderVariantInfo();
+    else if (mode === 'exam' && examView === 'start') renderExamStart();
+  }
+  function route() {
+    const h = location.hash.slice(1);
+    const i = h.indexOf('=');
+    const name = i < 0 ? h : h.slice(0, i), arg = i < 0 ? '' : decodeURIComponent(h.slice(i + 1));
+    mode = ['variant', 'trainer', 'exam'].includes(name) ? name : 'bank';
+    clearInterval(examTimer);
+    document.body.classList.remove('focus');
+    document.body.dataset.mode = mode;
+    ['bank', 'variant', 'trainer', 'exam'].forEach(m => { $('view-' + m).hidden = m !== mode; });
+    $('modes').querySelectorAll('a').forEach(a => a.classList.toggle('on', a.dataset.mode === mode));
+    $('filters-note').textContent = mode === 'variant' ? 'Для вариантов учитываются только разделы КЭС.' : '';
+    if (mode === 'bank') renderBank();
+    else if (mode === 'variant') {
+      if (arg) variant = { ids: idsFromArg(arg) };
+      if (!arg || !variant) { variant = variant && variant.ids ? variant : { ids: newVariantIds() }; }
+      saveVariant();
+      $('variant-key').hidden = !vopt.show;
+      renderVariant();
+    } else if (mode === 'trainer') renderTrainer(canonId(arg));
+    else {
+      if (arg) examDraft = idsFromArg(arg);
+      examView = examDraft ? 'start' : null;
+      renderExam();
+    }
+  }
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
+</body>
+</html>
