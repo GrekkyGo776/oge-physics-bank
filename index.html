@@ -110,6 +110,15 @@ main { min-width: 0; }
 .badge.book { background: transparent; border: 1px dashed var(--line-strong); color: var(--muted); }
 .badge.demo { background: var(--accent-soft); border: 1px solid transparent; color: var(--accent); }
 .badge.sub { background: transparent; border: 1px solid var(--line-strong); color: var(--ink); }
+.task span.stack { display: inline-flex; flex-direction: column; vertical-align: -0.38em; line-height: 1; font-size: .7em; text-align: right; margin-right: .06em; }
+.task .nuc { white-space: nowrap; }
+.task span.stack sup, .task span.stack sub { font-size: 1em; vertical-align: baseline; line-height: 1; }
+.task .qbox { border: 1px solid currentColor; padding: 0 .2em; margin: 0 .05em; }
+.task .vec { position: relative; display: inline-block; }
+.task .vec::before { content: "→"; position: absolute; left: 0; right: 0; top: -.62em; font-size: .7em; line-height: 1; text-align: center; font-style: normal; }
+.task p.fig, .task p.center { text-align: center; } .task img.inline { vertical-align: middle; }
+.task table.matching { width: 100%; } .task table.matching > tbody > tr > td, .task table.matching > tbody > tr > th { width: 50%; vertical-align: top; text-align: left; }
+.demo-reading { border-left: 3px solid var(--line-strong); padding-left: 12px; margin-bottom: 12px; }
 .badge.sub.auto { color: var(--muted); }
 #f-sub .chip::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px;
   background: var(--sec, var(--s0)); vertical-align: 1px; }
@@ -138,7 +147,7 @@ main { min-width: 0; }
 .task math { font-size: 1.08em; }
 .opts { margin: 12px 0 0; padding: 0; list-style: none; counter-reset: opt; }
 .opts li { display: flex; gap: 10px; padding: 4px 0; }
-.opts li b { flex: none; min-width: 24px; height: 24px; border-radius: 50%; background: var(--chip); display: inline-flex; align-items: center;
+.opts li > b, .opts li > label > b { flex: none; min-width: 24px; height: 24px; border-radius: 50%; background: var(--chip); display: inline-flex; align-items: center;
   justify-content: center; font-size: 12.5px; font-weight: 600; margin-top: 1px; }
 .opts.pick li { padding: 0; }
 .opts.pick label { display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; margin: 4px 0; border-radius: var(--radius-sm); cursor: pointer;
@@ -620,7 +629,9 @@ footer.foot a { color: inherit; }
     ? `<span class="badge sub auto" title="Подраздел определён автоматически по тексту задания${t.subsection_confidence ? ` (уверенность: ${CONF_NAME[t.subsection_confidence] || t.subsection_confidence})` : ''}">≈ ${esc(subTitle[s] || s)}</span>`
     : `<span class="badge sub" title="Подраздел по теме КЭС">${esc(subTitle[s] || s)}</span>`).join('');
   const kesBadges = t => subBadges(t) + t.kes.map(k => `<span class="badge kes" title="${esc(k.title)}">КЭС ${esc(k.code || '?')}</span>`).join('');
-  const optionsList = t => t.options.length && !t.scan
+  // Варианты ответа нарисованы на картинке (скан задания или рисунок с подписями «1)»…«4)») — в поле ответа только номера.
+  const optsInPicture = t => t.scan || t.options_in_figure;
+  const optionsList = t => t.options.length && !optsInPicture(t)
     ? `<ol class="opts">${t.options.map(o => `<li><b>${esc(o.n)})</b><div>${fixMedia(o.html)}</div></li>`).join('')}</ol>` : '';
   const slotsTable = (t, cells) => `<table class="slots"><tr>${t.answer_slots.map(s => `<td>${esc(s)}</td>`).join('')}</tr><tr>${cells}</tr></table>`;
   // Задания 17–22 в КИМ всегда с развёрнутым ответом, даже если в банке у них поле для краткого.
@@ -639,7 +650,7 @@ footer.foot a { color: inherit; }
     let h;
     if (isExtended(t)) {
       h = optionsList(t) + '<div class="answer-line">Развёрнутый ответ: запишите решение на листе, затем сравните с критериями.</div>';
-    } else if ((w === 'radio' || w === 'checkbox') && t.options.length && t.scan) {
+    } else if ((w === 'radio' || w === 'checkbox') && t.options.length && optsInPicture(t)) {
       h = `<div class="opts-inline">Ответ: ${t.options.map(o => `<label data-n="${esc(o.n)}"><input type="${w}" name="${key}" value="${esc(o.n)}"><b>${esc(o.n)}</b></label>`).join('')}</div>`;
       if (w === 'checkbox') h += '<div class="answer-line">Отметьте все верные варианты.</div>';
     } else if ((w === 'radio' || w === 'checkbox') && t.options.length) {
@@ -718,6 +729,7 @@ footer.foot a { color: inherit; }
         ${t.low_vision ? '<span class="badge lv" title="Возможно использование для слабовидящих">👁</span>' : ''}
         <span class="grow"></span>
         ${others > 0 && state.family !== t.family_id ? `<a href="#bank" data-family="${esc(t.family_id)}" data-from="${esc(t.id)}">Похожие задания (${others})</a>` : ''}
+        ${!t.scan && t.scan_media && t.scan_media.length ? `<a href="${MEDIA}${esc(t.scan_media[0].local)}" target="_blank" rel="noopener" title="Задание в том виде, как оно напечатано в демоверсии">оригинал</a>` : ''}
         ${t.source_url ? `<a href="${esc(t.source_url)}" target="_blank" rel="noopener">ФИПИ</a>` : '<span class="src-book">сборник</span>'}
         <label><input type="checkbox" data-pick="${esc(t.id)}" ${picked.has(t.id) ? 'checked' : ''}> в подборку</label>
       </div>
