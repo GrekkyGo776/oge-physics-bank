@@ -59,6 +59,31 @@ aside h3:first-child { margin-top: 0; }
 .chip small { color: var(--muted); margin-left: 5px; font-variant-numeric: tabular-nums; }
 .chip.on { background: var(--chip-on); color: var(--accent-ink); border-color: var(--chip-on); }
 .chip.on small { color: inherit; opacity: .75; }
+.chip.out { background: var(--bad-bg); color: var(--bad); border-color: #f3b7b0; text-decoration: line-through; text-decoration-thickness: 1.5px; }
+.chip.out small { color: inherit; opacity: .75; }
+.filter-hint { font-size: 12px; color: var(--muted); margin: 8px 0 0; line-height: 1.4; }
+.filter-hint b { font-weight: 600; } .filter-hint .x { color: var(--bad); text-decoration: line-through; }
+details.pick-list > summary { list-style: none; cursor: pointer; padding: 8px 30px 8px 11px; border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--panel); font-size: 14px; position: relative; line-height: 1.4; }
+details.pick-list > summary::-webkit-details-marker { display: none; }
+details.pick-list > summary::after { content: ""; position: absolute; right: 12px; top: 50%; width: 7px; height: 7px; margin-top: -6px;
+  border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); }
+details.pick-list[open] > summary::after { transform: rotate(-135deg); margin-top: -2px; }
+details.pick-list[open] > summary { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+details.pick-list .pl-body { margin-top: 6px; }
+details.pick-list .pl-list { max-height: 320px; overflow: auto; overscroll-behavior: contain; margin-top: 6px; border: 1px solid var(--line);
+  border-radius: var(--radius-sm); padding: 4px; background: var(--panel); }
+.pl-group { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); padding: 8px 8px 3px; }
+.trow { display: flex; gap: 8px; align-items: baseline; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; line-height: 1.35; user-select: none; }
+.trow:hover { background: var(--soft); }
+.trow .code { flex: none; min-width: 30px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.trow .tt { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.trow small { margin-left: auto; padding-left: 6px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.trow.on { background: var(--accent-soft); color: var(--accent); } .trow.on .code { color: inherit; }
+.trow.out { background: var(--bad-bg); color: var(--bad); text-decoration: line-through; } .trow.out .code { color: inherit; }
+.trow.empty { opacity: .45; cursor: default; }
+.pl-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; font-size: 12px; color: var(--muted); }
+.pl-actions button { font: inherit; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; }
 .chip.kim { min-width: 38px; text-align: center; padding: 4px 6px; font-variant-numeric: tabular-nums; }
 #f-section .chip::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px;
   vertical-align: 1px; background: var(--sec, var(--s0)); }
@@ -303,6 +328,7 @@ footer.foot a { color: inherit; }
   <aside id="filters">
     <h3>Поиск</h3>
     <input type="search" id="q" placeholder="Текст или номер задания (4D1B4F)">
+    <p class="filter-hint">Щелчок по метке — <b>выбрать</b>, второй — <span class="x">исключить</span>, третий — снять.</p>
     <h3>Раздел КЭС</h3>
     <div class="chips" id="f-section"></div>
     <div id="f-sub-box">
@@ -310,19 +336,26 @@ footer.foot a { color: inherit; }
       <div class="chips" id="f-sub"></div>
     </div>
     <h3>Тема КЭС</h3>
-    <select id="f-topic"><option value="">Все темы</option></select>
+    <details class="pick-list" id="f-topic-box">
+      <summary id="f-topic-sum">Все темы</summary>
+      <div class="pl-body">
+        <input type="search" id="f-topic-q" placeholder="Найти тему: «линза», «2.3»">
+        <div class="pl-list" id="f-topic"></div>
+        <div class="pl-actions"><span>Можно выбрать несколько тем</span><button type="button" id="f-topic-clear">Снять все</button></div>
+      </div>
+    </details>
     <h3>Тип ответа (ФИПИ)</h3>
     <div class="chips" id="f-type"></div>
     <h3>Номер линии (задание КИМ)</h3>
     <div class="chips" id="f-kim"></div>
     <h3>Часть работы</h3>
     <div class="chips" id="f-part"></div>
+    <h3>Источник заданий</h3>
+    <div class="chips" id="f-src"></div>
     <h3>Прочее</h3>
     <label class="check"><input type="checkbox" id="f-media"> только с рисунками</label>
     <label class="check"><input type="checkbox" id="f-text"> только к тексту</label>
     <label class="check"><input type="checkbox" id="f-answer"> только с ответом</label>
-    <label class="check"><input type="checkbox" id="f-demo"> из демоверсий ФИПИ</label>
-    <label class="check" title="Задания из сборников «ОГЭ. Физика. Типовые экзаменационные варианты» (Е. Е. Камзеева). Выключите, чтобы оставить только материалы ФИПИ — в списке, тренажёре, вариантах и экзамене."><input type="checkbox" id="f-books" checked> задания из сборников</label>
     <label class="check"><input type="checkbox" id="f-lv"> для слабовидящих</label>
     <label class="check"><input type="checkbox" id="f-picked"> только подборка</label>
     <h3>Сортировка</h3>
@@ -344,8 +377,10 @@ footer.foot a { color: inherit; }
         <label class="check" title="Задания одного шаблона с разными числами или рисунками — одной карточкой; остальные открываются по ссылке «Похожие задания»"><input type="checkbox" id="group-fam"> похожие одной карточкой</label>
         <label class="check"><input type="checkbox" id="show-answers"> показывать ответы</label>
         <span id="picked-info"></span>
+        <button class="btn" id="pick-all" title="Добавить в подборку все задания, которые сейчас видны в списке (на всех страницах)">Выбрать все найденные</button>
         <button class="btn" id="copy-picked">Скопировать номера подборки</button>
         <button class="btn" id="clear-picked">Очистить подборку</button>
+        <button class="btn" id="word" title="Файл Word (.docx): подборка, а если она пуста — найденные задания; в конце — таблица ответов">Скачать Word</button>
         <button class="btn primary" id="print">Печать</button>
       </div>
       <div id="list"></div>
@@ -362,6 +397,7 @@ footer.foot a { color: inherit; }
         <button class="btn" id="v-exam">Решить как экзамен</button>
         <button class="btn" id="v-print">Печать варианта</button>
         <button class="btn" id="v-print-key">Печать ответов</button>
+        <button class="btn" id="v-word" title="Вариант файлом Word (.docx), в конце — таблица ответов">Скачать Word</button>
       </div>
       <div class="panel" id="variant-info"></div>
       <div class="booklet-head print-only" id="booklet-head"></div>
@@ -434,9 +470,12 @@ footer.foot a { color: inherit; }
     set(k, v) { try { localStorage.setItem('oge-phys:' + k, JSON.stringify(v)); } catch (e) { /* без хранилища — только в памяти */ } }
   };
   const state = {
-    q: '', sections: new Set(), subs: new Set(), topic: '', types: new Set(), kims: new Set(), parts: new Set(), family: null,
-    media: false, text: false, lv: false, picked: false, answer: false, demo: false, showAnswers: false, sort: 'kim', page: 1,
-    books: store.get('books', true), groupFam: store.get('groupFam', true)
+    q: '', sections: new Set(), subs: new Set(), topics: new Set(), types: new Set(), kims: new Set(), parts: new Set(), src: new Set(),
+    family: null,
+    // исключённые значения тех же фильтров (второй щелчок по метке)
+    out: { sections: new Set(), subs: new Set(), topics: new Set(), types: new Set(), kims: new Set(), parts: new Set(), src: new Set() },
+    media: false, text: false, lv: false, picked: false, answer: false, showAnswers: false, sort: 'kim', page: 1,
+    groupFam: store.get('groupFam', true)
   };
   const picked = new Set(store.get('picked', []));
   let mode = 'bank';
@@ -472,16 +511,36 @@ footer.foot a { color: inherit; }
   // ------------------------------------------------------------------ фильтры
 
   function count(pred) { return B.tasks.filter(pred).length; }
-  function chip(container, value, label, n, set, extraClass) {
+  // Метка фильтра в трёх состояниях: снята → выбрана (задание должно подходить) → исключена (не должно) → снята.
+  function cycleFilter(key, value) {
+    const inc = state[key], exc = state.out[key];
+    if (inc.has(value)) { inc.delete(value); exc.add(value); }
+    else if (exc.has(value)) exc.delete(value);
+    else inc.add(value);
+  }
+  function paintFilter(el, key, value) {
+    const on = state[key].has(value), out = state.out[key].has(value);
+    el.classList.toggle('on', on);
+    el.classList.toggle('out', out);
+    el.setAttribute('aria-pressed', on ? 'true' : out ? 'mixed' : 'false');
+  }
+  // Задание проходит фильтр: есть хоть одно выбранное значение (если выбраны) и нет ни одного исключённого.
+  function passes(key, vals) {
+    const inc = state[key], exc = state.out[key];
+    return (!inc.size || vals.some(v => inc.has(v))) && (!exc.size || !vals.some(v => exc.has(v)));
+  }
+  function chip(container, value, label, n, key, extraClass) {
     const el = document.createElement('span');
     el.className = 'chip' + (extraClass ? ' ' + extraClass : '');
+    el.setAttribute('role', 'button');
     el.innerHTML = `${label}${n != null ? `<small>${n}</small>` : ''}`;
-    el.onclick = () => { set.has(value) ? set.delete(value) : set.add(value); el.classList.toggle('on'); state.page = 1; refresh(); };
+    el.onclick = () => { cycleFilter(key, value); paintFilter(el, key, value); state.page = 1; refresh(); };
     el.dataset.value = value;
+    paintFilter(el, key, value);
     container.appendChild(el);
   }
   B.kes.forEach(s => chip($('f-section'), s.code, `${s.code}. ${s.title.charAt(0) + s.title.slice(1).toLowerCase()}`,
-    count(t => t.kes_sections.some(x => x.code === s.code)), state.sections));
+    count(t => t.kes_sections.some(x => x.code === s.code)), 'sections'));
   // Подразделы: промежуточный уровень между разделом и темой КЭС (meta.subsections). Видны подразделы
   // выбранных разделов (без выбора — все); выбор подраздела сужает список тем.
   const SUBS = B.meta.subsections || [];
@@ -491,91 +550,141 @@ footer.foot a { color: inherit; }
     const box = $('f-sub');
     box.innerHTML = '';
     SUBS.forEach(s => {
-      if (state.sections.size && !state.sections.has(s.section)) { state.subs.delete(s.id); return; }
-      chip(box, s.id, esc(s.title), count(t => (t.subsections || []).includes(s.id)), state.subs);
+      if (state.sections.size && !state.sections.has(s.section) || state.out.sections.has(s.section)) {
+        state.subs.delete(s.id); state.out.subs.delete(s.id); return;  // подразделы невыбранных и исключённых разделов не показываем
+      }
+      chip(box, s.id, esc(s.title), count(t => (t.subsections || []).includes(s.id)), 'subs');
       box.lastChild.dataset.sec = s.section;
       box.lastChild.title = 'Темы КЭС ' + s.topics.join(', ');
-      if (state.subs.has(s.id)) box.lastChild.classList.add('on');
     });
     $('f-sub-box').hidden = !SUBS.length;
     narrowTopics();
   }
   $('f-section').addEventListener('click', () => { renderSubChips(); refresh(); });
   $('f-sub').addEventListener('click', () => { narrowTopics(); refresh(); });
-  TYPE_ORDER.forEach(ty => chip($('f-type'), ty, TYPE_SHORT[ty], count(t => t.answer_type === ty), state.types));
+  TYPE_ORDER.forEach(ty => chip($('f-type'), ty, TYPE_SHORT[ty], count(t => t.answer_type === ty), 'types'));
   for (const k of LINES) {
     const n = count(t => t.line_number === k);
-    chip($('f-kim'), k, String(k), null, state.kims, 'kim');
+    chip($('f-kim'), k, String(k), null, 'kims', 'kim');
     $('f-kim').lastChild.title = `${KIM.plan[k]} — уровень: ${LEVEL_NAME[KIM.level[k]] || '?'}, макс. ${balls(maxOf(k))}; заданий: ${n}`;
     if (!n) $('f-kim').lastChild.style.opacity = .45;
   }
-  chip($('f-part'), 1, 'Краткий ответ (1–16)', count(t => t.part === 1), state.parts);
-  chip($('f-part'), 2, 'Развёрнутый (17–22)', count(t => t.part === 2), state.parts);
-
-  const topicSel = $('f-topic');
-  B.kes.forEach(s => {
-    const g = document.createElement('optgroup');
-    g.label = `${s.code} ${s.title}`;
-    const all = document.createElement('option');
-    all.value = s.code; all.textContent = `${s.code} — весь раздел (${count(t => t.kes_codes.includes(s.code))} без темы)`;
-    g.appendChild(all);
-    s.topics.forEach(tp => {
-      const n = count(t => t.kes_codes.includes(tp.code));
-      const o = document.createElement('option');
-      o.value = tp.code; o.textContent = `${tp.code} ${tp.title.slice(0, 90)}${tp.title.length > 90 ? '…' : ''} (${n})`;
-      if (!n) { o.disabled = true; o.dataset.empty = '1'; }
-      g.appendChild(o);
-    });
-    topicSel.appendChild(g);
+  chip($('f-part'), 1, 'Краткий ответ (1–16)', count(t => t.part === 1), 'parts');
+  chip($('f-part'), 2, 'Развёрнутый (17–22)', count(t => t.part === 2), 'parts');
+  // Источник: открытый банк ФИПИ, демоверсии ФИПИ, сборники. Задание банка, которое было в демоверсии или есть
+  // в сборнике, относится и к ним. Ничего не выбрано — видны задания всех источников.
+  const srcOf = t => {
+    const s = [];
+    if (!t.source) s.push('fipi');
+    if (t.source === 'demo' || (t.demo_refs && t.demo_refs.length)) s.push('demo');
+    if (t.source === 'book' || (t.book_refs && t.book_refs.length)) s.push('book');
+    return s;
+  };
+  [['fipi', 'Банк ФИПИ', 'Задания открытого банка ФИПИ'],
+   ['demo', 'Демоверсии ФИПИ', 'Задания демоверсий ОГЭ 2017–2027, в том числе задания банка, которые были в демоверсиях'],
+   ['book', 'Сборники Камзеевой', 'Задания сборников «ОГЭ. Физика. Типовые экзаменационные варианты» (Е. Е. Камзеева), в том числе задания банка, которые есть в сборниках']
+  ].forEach(([v, label, title]) => {
+    const n = count(t => srcOf(t).includes(v));
+    if (!n) return;
+    chip($('f-src'), v, label, n, 'src');
+    $('f-src').lastChild.title = title + '. Щелчок — только они, второй щелчок — без них.';
   });
 
-  function narrowTopics() {
-    const allowed = state.subs.size ? new Set(SUBS.filter(s => state.subs.has(s.id)).flatMap(s => s.topics)) : null;
-    topicSel.querySelectorAll('optgroup').forEach(g => {
-      let any = false;
-      g.querySelectorAll('option').forEach(o => {
-        const show = !allowed || allowed.has(o.value);
-        o.hidden = !show;
-        o.disabled = !show || o.dataset.empty === '1';
-        any = any || show;
-      });
-      g.hidden = !any;
+  // Темы КЭС: список с поиском, можно выбрать и исключить несколько тем (те же три состояния, что у меток).
+  const topicList = $('f-topic');
+  const topicTitle = {};
+  B.kes.forEach(s => {
+    const g = document.createElement('div');
+    g.className = 'pl-group'; g.dataset.group = s.code;
+    g.textContent = `${s.code}. ${s.title.charAt(0) + s.title.slice(1).toLowerCase()}`;
+    topicList.appendChild(g);
+    const rows = [{ code: s.code, title: 'весь раздел — задания без темы', n: count(t => t.kes_codes.includes(s.code)) }]
+      .concat(s.topics.map(tp => ({ code: tp.code, title: tp.title, n: count(t => t.kes_codes.includes(tp.code)) })));
+    rows.forEach(r => {
+      topicTitle[r.code] = r.title;
+      const el = document.createElement('div');
+      el.className = 'trow' + (r.n ? '' : ' empty');
+      el.dataset.value = r.code; el.dataset.group = s.code;
+      el.dataset.search = (r.code + ' ' + r.title).toLowerCase().replace(/ё/g, 'е');
+      el.innerHTML = `<span class="code">${esc(r.code)}</span><span class="tt">${esc(r.title)}</span><small>${r.n}</small>`;
+      el.title = r.title;
+      if (r.n) {
+        el.setAttribute('role', 'button');
+        el.onclick = () => { cycleFilter('topics', r.code); paintFilter(el, 'topics', r.code); topicSummary(); state.page = 1; refresh(); };
+      }
+      topicList.appendChild(el);
     });
-    if (allowed && state.topic && !allowed.has(state.topic)) { state.topic = ''; topicSel.value = ''; }
+  });
+  function topicSummary() {
+    const inc = [...state.topics], exc = [...state.out.topics];
+    const parts = [];
+    if (inc.length) parts.push((inc.length === 1 ? `${inc[0]} ${topicTitle[inc[0]] || ''}`.slice(0, 60) : 'выбрано: ' + inc.join(', ')));
+    if (exc.length) parts.push('без ' + exc.join(', '));
+    $('f-topic-sum').textContent = parts.length ? parts.join('; ') : 'Все темы';
+    $('f-topic-sum').title = parts.join('; ');
   }
+  function narrowTopics() {
+    // выбранные подразделы сужают список тем; поиск по тексту — тоже
+    const allowed = state.subs.size ? new Set(SUBS.filter(s => state.subs.has(s.id)).flatMap(s => s.topics)) : null;
+    const q = ($('f-topic-q').value || '').trim().toLowerCase().replace(/ё/g, 'е');
+    const shown = {};
+    topicList.querySelectorAll('.trow').forEach(el => {
+      const v = el.dataset.value;
+      const ok = !allowed || allowed.has(v);
+      if (!ok) { state.topics.delete(v); state.out.topics.delete(v); }
+      el.hidden = !ok || (q && !el.dataset.search.includes(q));
+      paintFilter(el, 'topics', v);
+      if (!el.hidden) shown[el.dataset.group] = true;
+    });
+    topicList.querySelectorAll('.pl-group').forEach(g => { g.hidden = !shown[g.dataset.group]; });
+    topicSummary();
+  }
+  $('f-topic-q').oninput = narrowTopics;
+  $('f-topic-clear').onclick = () => { state.topics.clear(); state.out.topics.clear(); narrowTopics(); state.page = 1; refresh(); };
   renderSubChips();
 
   $('q').oninput = e => { state.q = e.target.value.trim().toLowerCase(); state.page = 1; refresh(); };
-  topicSel.onchange = e => { state.topic = e.target.value; state.page = 1; refresh(); };
-  ['media', 'text', 'lv', 'picked', 'answer', 'demo'].forEach(k => { $('f-' + k).onchange = e => { state[k] = e.target.checked; state.page = 1; refresh(); }; });
-  $('f-books').checked = state.books;
-  $('f-books').onchange = e => { state.books = e.target.checked; store.set('books', state.books); state.page = 1; refresh(); };
+  ['media', 'text', 'lv', 'picked', 'answer'].forEach(k => { $('f-' + k).onchange = e => { state[k] = e.target.checked; state.page = 1; refresh(); }; });
   $('group-fam').checked = state.groupFam;
   $('group-fam').onchange = e => { state.groupFam = e.target.checked; store.set('groupFam', state.groupFam); state.page = 1; renderBank(); };
   $('show-answers').onchange = e => { state.showAnswers = e.target.checked; renderBank(); };
   $('sort').onchange = e => { state.sort = e.target.value; refresh(); };
   $('toggle').onclick = () => $('filters').classList.toggle('open');
   $('reset').onclick = () => {
-    Object.assign(state, { q: '', topic: '', family: null, media: false, text: false, lv: false, picked: false, answer: false, demo: false, page: 1 });
-    ['sections', 'subs', 'types', 'kims', 'parts'].forEach(k => state[k].clear());
-    document.querySelectorAll('.chip.on').forEach(c => c.classList.remove('on'));
-    $('q').value = ''; topicSel.value = '';
-    ['media', 'text', 'lv', 'picked', 'answer', 'demo'].forEach(k => { $('f-' + k).checked = false; });
+    Object.assign(state, { q: '', family: null, media: false, text: false, lv: false, picked: false, answer: false, page: 1 });
+    ['sections', 'subs', 'topics', 'types', 'kims', 'parts', 'src'].forEach(k => { state[k].clear(); state.out[k].clear(); });
+    document.querySelectorAll('.chip.on, .chip.out').forEach(c => { c.classList.remove('on', 'out'); c.setAttribute('aria-pressed', 'false'); });
+    $('q').value = ''; $('f-topic-q').value = '';
+    ['media', 'text', 'lv', 'picked', 'answer'].forEach(k => { $('f-' + k).checked = false; });
     renderSubChips();
     refresh();
   };
   function setLineFilter(line) {
-    state.kims.clear();
+    state.kims.clear(); state.out.kims.clear();
     if (line) state.kims.add(line);
-    $('f-kim').querySelectorAll('.chip').forEach(c => c.classList.toggle('on', +c.dataset.value === line));
+    $('f-kim').querySelectorAll('.chip').forEach(c => paintFilter(c, 'kims', +c.dataset.value));
   }
   $('print').onclick = () => window.print();
   $('clear-picked').onclick = () => { picked.clear(); store.set('picked', []); renderBank(); };
+  // «Выбрать все найденные»: все карточки текущего списка (на всех страницах); если все уже в подборке — убрать их.
+  let shownList = [];
+  function updatePickAll() {
+    const all = shownList.length && shownList.every(t => picked.has(t.id));
+    $('pick-all').textContent = all ? 'Убрать найденные из подборки' : `Выбрать все найденные (${shownList.length})`;
+    $('pick-all').disabled = !shownList.length;
+    $('picked-info').textContent = picked.size ? `В подборке: ${picked.size}` : '';
+  }
+  $('pick-all').onclick = () => {
+    const all = shownList.every(t => picked.has(t.id));
+    shownList.forEach(t => (all ? picked.delete(t.id) : picked.add(t.id)));
+    store.set('picked', [...picked]);
+    renderBank();
+  };
   $('copy-picked').onclick = () => copyText([...picked].join(', '), 'Номера заданий:');
 
   const kesKey = t => (t.kes_codes[0] || '9').split('.').map(x => x.padStart(3, '0')).join('.');
-  // Задания из сборников можно выключить целиком (переключатель «задания из сборников»).
-  const visible = t => state.books || t.source !== 'book';
+  // Фильтр источника действует везде: в списке, тренажёре, вариантах и экзамене.
+  const visible = t => passes('src', srcOf(t));
   function filtered() {
     if (state.family) {
       return B.tasks.filter(t => visible(t) && t.family_id === state.family).sort((a, b) => a.id.localeCompare(b.id));
@@ -583,17 +692,16 @@ footer.foot a { color: inherit; }
     const q = state.q;
     let list = B.tasks.filter(t => visible(t) &&
       (!q || t._search.includes(q)) &&
-      (!state.sections.size || t.kes_sections.some(s => state.sections.has(s.code))) &&
-      (!state.subs.size || (t.subsections || []).some(s => state.subs.has(s))) &&
-      (!state.topic || t.kes_codes.includes(state.topic)) &&
-      (!state.types.size || state.types.has(t.answer_type)) &&
-      (!state.kims.size || state.kims.has(t.line_number)) &&
-      (!state.parts.size || state.parts.has(t.part)) &&
+      passes('sections', t.kes_sections.map(s => s.code)) &&
+      passes('subs', t.subsections || []) &&
+      passes('topics', t.kes_codes) &&
+      passes('types', [t.answer_type]) &&
+      passes('kims', [t.line_number]) &&
+      passes('parts', [t.part]) &&
       (!state.media || t.media.length) &&
       (!state.text || t.text_id) &&
       (!state.lv || t.low_vision) &&
       (!state.answer || t.answer) &&
-      (!state.demo || (t.demo_refs && t.demo_refs.length)) &&
       (!state.picked || picked.has(t.id))
     );
     const cmp = {
@@ -752,10 +860,11 @@ footer.foot a { color: inherit; }
     $('family-info').innerHTML = state.family
       ? `<span class="family-chip">Похожие задания к ${esc(state.familyFrom || '')} — фильтры не действуют <button class="btn small" id="family-off">Вернуться к фильтрам</button></span>` : '';
     if (state.family) $('family-off').onclick = () => { state.family = null; state.page = 1; renderBank(); };
-    $('picked-info').textContent = picked.size ? `В подборке: ${picked.size}` : '';
+    shownList = list;
+    updatePickAll();
     $('list').innerHTML = slice.length ? slice.map(card).join('') : '<div class="empty">Ничего не найдено</div>';
     $('list').querySelectorAll('[data-pick]').forEach(cb => {
-      cb.onchange = () => { cb.checked ? picked.add(cb.dataset.pick) : picked.delete(cb.dataset.pick); store.set('picked', [...picked]); $('picked-info').textContent = picked.size ? `В подборке: ${picked.size}` : ''; };
+      cb.onchange = () => { cb.checked ? picked.add(cb.dataset.pick) : picked.delete(cb.dataset.pick); store.set('picked', [...picked]); updatePickAll(); };
     });
     $('list').querySelectorAll('[data-family]').forEach(a => {
       a.onclick = e => { e.preventDefault(); state.family = a.dataset.family; state.familyFrom = a.dataset.from; state.page = 1; renderBank(); window.scrollTo(0, 0); };
@@ -899,8 +1008,7 @@ footer.foot a { color: inherit; }
 
   function candidatesFor(line, onlyAnswered) {
     let c = (byLine[line] || []).filter(visible);
-    if (state.sections.size) c = c.filter(t => t.kes_sections.some(s => state.sections.has(s.code)));
-    if (state.subs.size) c = c.filter(t => (t.subsections || []).some(s => state.subs.has(s)));
+    c = c.filter(t => passes('sections', t.kes_sections.map(s => s.code)) && passes('subs', t.subsections || []));
     if (line === 18) { const withText = c.filter(t => t.text_id); if (withText.length) c = withText; }
     if (onlyAnswered) { const a = c.filter(t => t.answer); if (a.length) c = a; }
     return c;
@@ -920,9 +1028,11 @@ footer.foot a { color: inherit; }
     store.set('variant', variant);
     history.replaceState(null, '', '#variant=' + variant.ids.join(','));
   }
-  const sectionsNote = () => (state.sections.size
-    ? 'разделы КЭС: ' + [...state.sections].sort().map(c => `${c}. ${kesTitle[c].charAt(0) + kesTitle[c].slice(1).toLowerCase()}`).join('; ')
-    : 'разделы КЭС: все') + (state.subs.size ? '; подразделы: ' + [...state.subs].sort().map(s => subTitle[s]).join('; ') : '');
+  const secName = c => `${c}. ${kesTitle[c].charAt(0) + kesTitle[c].slice(1).toLowerCase()}`;
+  const sectionsNote = () => (state.sections.size ? 'разделы КЭС: ' + [...state.sections].sort().map(secName).join('; ') : 'разделы КЭС: все') +
+    (state.out.sections.size ? '; кроме разделов: ' + [...state.out.sections].sort().map(secName).join('; ') : '') +
+    (state.subs.size ? '; подразделы: ' + [...state.subs].sort().map(s => subTitle[s]).join('; ') : '') +
+    (state.out.subs.size ? '; кроме подразделов: ' + [...state.out.subs].sort().map(s => subTitle[s]).join('; ') : '');
   const variantTasks = ids => ids.map((id, i) => ({ line: i + 1, id, t: id ? byId[id] : null }));
 
   function renderVariantInfo() {
@@ -1026,6 +1136,307 @@ footer.foot a { color: inherit; }
   $('v-print').onclick = () => printAs('print-booklet');
   $('v-print-key').onclick = () => printAs('print-key');
   window.addEventListener('afterprint', () => document.body.classList.remove('print-booklet', 'print-key'));
+
+  // ------------------------------------------------------------------ выгрузка в Word
+
+  // Файл .docx собирается прямо в браузере библиотекой docx (docx.min.js рядом со страницей, грузится при первом
+  // нажатии). Текст, индексы и формулы остаются текстом Word, рисунки и сканы — картинками, в конце — таблица ответов.
+  let docxLoading = null;
+  function loadDocx() {
+    if (window.docx) return Promise.resolve(window.docx);
+    if (!docxLoading) docxLoading = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'docx.min.js';
+      s.onload = () => resolve(window.docx);
+      s.onerror = () => { docxLoading = null; reject(new Error('не загрузился модуль для Word (docx.min.js)')); };
+      document.head.appendChild(s);
+    });
+    return docxLoading;
+  }
+  const PAGE_PX = 640;  // ширина текста на листе A4 с полями 1,5 см (пиксели Word, 96 на дюйм)
+  async function wordImage(src) {
+    try {
+      const buf = await (await fetch(src)).arrayBuffer();
+      const b = new Uint8Array(buf.slice(0, 4));
+      let type = b[0] === 0x89 && b[1] === 0x50 ? 'png' : b[0] === 0xff && b[1] === 0xd8 ? 'jpg' : b[0] === 0x47 && b[1] === 0x49 ? 'gif' : null;
+      const url = URL.createObjectURL(new Blob([buf], { type: type ? 'image/' + (type === 'jpg' ? 'jpeg' : type) : '' }));
+      const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+      let data = buf;
+      if (!type) {  // формат, которого Word не берёт, — перерисовать в PNG
+        const c = document.createElement('canvas');
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        c.getContext('2d').drawImage(img, 0, 0);
+        data = await new Promise(r => c.toBlob(bl => bl.arrayBuffer().then(r), 'image/png'));
+        type = 'png';
+      }
+      URL.revokeObjectURL(url);
+      return { data, type, w: img.naturalWidth || 1, h: img.naturalHeight || 1 };
+    } catch (e) { return null; }
+  }
+
+  // HTML → промежуточный вид: абзацы из кусочков с оформлением ({p, f}) и таблицы ({table, f}); потом — объекты docx.
+  const WBLOCK = new Set(['p', 'div', 'section', 'article', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'details', 'center', 'blockquote', 'pre']);
+  function blockFmt(el, f) {
+    const g = Object.assign({}, f);
+    if (el.classList.contains('center') || el.classList.contains('fig') || el.getAttribute('align') === 'center') g.align = 'center';
+    if (el.classList.contains('hint')) Object.assign(g, { i: true, color: '666666', size: 20 });
+    if (el.classList.contains('demo-reading')) g.indent = { left: 280 };
+    return g;
+  }
+  function inlineItems(el, f, arr) {
+    const tag = el.localName;
+    if (tag === 'br') { arr.push({ br: true }); return; }
+    if (tag === 'img') { arr.push({ img: el, f }); return; }
+    if (tag === 'math') { arr.push({ math: el, f }); return; }
+    if (tag === 'input' || tag === 'select') { arr.push({ text: ' __________ ', f }); return; }
+    if (tag === 'script' || tag === 'style' || tag === 'button') return;
+    const g = Object.assign({}, f);
+    if (tag === 'b' || tag === 'strong') g.b = true;
+    if (tag === 'i' || tag === 'em') g.i = true;
+    if (tag === 'u') g.u = true;
+    if (tag === 's' || tag === 'strike') g.s = true;
+    if (tag === 'sub') g.sub = true;
+    if (tag === 'sup') g.sup = true;
+    if (el.classList.contains('blank')) { arr.push({ text: ' ____________________ ', f: g }); return; }
+    if (el.classList.contains('qbox')) g.box = true;
+    el.childNodes.forEach(ch => {
+      if (ch.nodeType === 3) arr.push({ text: ch.data, f: g });
+      else if (ch.nodeType === 1) inlineItems(ch, g, arr);
+    });
+    if (el.classList.contains('vec')) arr.push({ text: '⃗', f: g });  // стрелка вектора над буквой
+  }
+  function walkBlocks(node, f, out) {
+    let items = null;
+    const flush = () => { if (items) out.push({ p: items, f }); items = null; };
+    node.childNodes.forEach(ch => {
+      if (ch.nodeType === 3) { (items ||= []).push({ text: ch.data, f }); return; }
+      if (ch.nodeType !== 1 || ch.hidden) return;
+      const tag = ch.localName;
+      if (tag === 'table') { flush(); out.push({ table: ch, f }); return; }
+      if (tag === 'ol' || tag === 'ul') {
+        flush();
+        [...ch.children].forEach((li, k) => {
+          const sub = [];
+          // вариант ответа: номер «1)» и текст — один абзац с висячим отступом
+          const num = li.querySelector(':scope > b, :scope > label > b');
+          const body = li.querySelector(':scope > div, :scope > label > div');
+          walkBlocks(num && body ? body : li, f, sub);
+          const lead = { text: (num ? num.textContent.trim() : (tag === 'ol' ? (k + 1) + '.' : '•')) + ' ', f: Object.assign({}, f, { b: !!num }) };
+          if (sub[0] && sub[0].p) sub[0].p.unshift(lead); else sub.unshift({ p: [lead], f });
+          sub.forEach((x, i) => { if (x.p) x.f = Object.assign({}, x.f, { indent: i ? { left: 400 } : { left: 400, hanging: 400 } }); });
+          out.push(...sub);
+        });
+        return;
+      }
+      if (WBLOCK.has(tag)) { flush(); walkBlocks(ch, blockFmt(ch, f), out); return; }
+      inlineItems(ch, f, (items ||= []));
+    });
+    flush();
+  }
+  function mathKids(D, node) {
+    const kids = el => [...el.children].flatMap(c => mathKids(D, c));
+    const arg = i => node.children[i] ? mathKids(D, node.children[i]) : [];
+    const nz = a => (a.length ? a : [new D.MathRun('')]);
+    switch (node.localName) {
+      case 'mi': case 'mn': case 'mo': case 'mtext': case 'ms': {
+        const s = node.textContent.replace(/\s+/g, ' ');
+        return s ? [new D.MathRun(s)] : [];
+      }
+      case 'mfrac': return [new D.MathFraction({ numerator: nz(arg(0)), denominator: nz(arg(1)) })];
+      case 'msub': return [new D.MathSubScript({ children: nz(arg(0)), subScript: nz(arg(1)) })];
+      case 'msup': return [new D.MathSuperScript({ children: nz(arg(0)), superScript: nz(arg(1)) })];
+      case 'msubsup': return [new D.MathSubSuperScript({ children: nz(arg(0)), subScript: nz(arg(1)), superScript: nz(arg(2)) })];
+      case 'mmultiscripts': {  // нуклид ²³⁸₉₂U: индексы слева
+        const cs = [...node.children], pi = cs.findIndex(c => c.localName === 'mprescripts');
+        const base = cs[0] ? mathKids(D, cs[0]) : [];
+        if (pi < 0) return base;
+        const pre = cs.slice(pi + 1).map(c => mathKids(D, c));
+        return [new D.MathPreSubSuperScript({ children: nz(base), subScript: nz(pre[0] || []), superScript: nz(pre[1] || []) })];
+      }
+      case 'msqrt': return [new D.MathRadical({ children: nz(kids(node)) })];
+      case 'mroot': return [new D.MathRadical({ children: nz(arg(0)), degree: nz(arg(1)) })];
+      case 'mover': case 'munder': {
+        const acc = (node.children[1] && node.children[1].textContent) || '';
+        if (node.localName === 'mover' && /[→⃗]/.test(acc)) return [new D.MathRun(node.children[0].textContent + '⃗')];
+        return arg(0).concat(acc ? [new D.MathRun(acc)] : []);
+      }
+      case 'none': case 'mprescripts': case 'annotation': case 'annotation-xml': return [];
+      default: return kids(node);  // math, mrow, mstyle, semantics, menclose…
+    }
+  }
+  function irParagraph(D, items, f, imgs) {
+    // пробелы: подряд — один, по краям абзаца — убрать
+    const norm = [];
+    let space = true;
+    items.forEach(it => {
+      if (it.text != null) {
+        let s = it.text.replace(/\s+/g, ' ');
+        if (space) s = s.replace(/^ /, '');
+        if (!s) return;
+        norm.push({ text: s, f: it.f });
+        space = s.endsWith(' ');
+      } else { norm.push(it); space = !!it.br; }
+    });
+    while (norm.length && (norm[norm.length - 1].br || (norm[norm.length - 1].text != null && !norm[norm.length - 1].text.trim()))) norm.pop();
+    const last = norm[norm.length - 1];
+    if (last && last.text != null) last.text = last.text.replace(/ $/, '');
+    if (!norm.length) return null;
+    const runs = norm.map(it => {
+      if (it.br) return new D.TextRun({ break: 1 });
+      if (it.math) return new D.Math({ children: mathKids(D, it.math) });
+      if (it.img) {
+        const el = it.img, info = imgs.get(el.getAttribute('src'));
+        if (!info) return new D.TextRun({ text: '[рисунок]', italics: true });
+        let w, h;
+        const em = /height:\s*([\d.]+)em/.exec(el.getAttribute('style') || '');
+        if (em) { h = +em[1] * 16; w = h * info.w / info.h; }
+        else { w = +el.getAttribute('width') || info.w; h = w * info.h / info.w; }
+        const max = it.f.inTable ? 300 : PAGE_PX;
+        if (w > max) { h = h * max / w; w = max; }
+        return new D.ImageRun({ type: info.type, data: info.data, transformation: { width: Math.round(w), height: Math.round(h) } });
+      }
+      const g = it.f;
+      return new D.TextRun({
+        text: it.text, bold: g.b, italics: g.i, strike: g.s, subScript: g.sub, superScript: g.sup,
+        underline: g.u ? {} : undefined, color: g.color, size: g.size,
+        border: g.box ? { style: D.BorderStyle.SINGLE, size: 6, color: '000000', space: 1 } : undefined
+      });
+    });
+    return new D.Paragraph({
+      children: runs, alignment: f.align === 'center' ? D.AlignmentType.CENTER : undefined,
+      indent: f.indent, keepNext: !!f.keep, spacing: { after: f.inTable ? 0 : 80 }
+    });
+  }
+  function irTable(D, el, f, imgs) {
+    const slots = el.classList.contains('slots');
+    const bordered = el.getAttribute('border') === '1' || ['slots', 'demo-table', 'grid'].some(c => el.classList.contains(c));
+    const cf = Object.assign({}, f, { inTable: true, align: undefined, indent: undefined, keep: false });
+    const rows = [...el.querySelectorAll(':scope > tr, :scope > tbody > tr, :scope > thead > tr, :scope > tfoot > tr')].map(tr => {
+      const cells = [...tr.children].filter(c => c.localName === 'td' || c.localName === 'th').map(td => {
+        const ir = [];
+        walkBlocks(td, td.localName === 'th' ? Object.assign({}, cf, { b: true }) : cf, ir);
+        const children = irToDocx(D, ir, imgs);
+        if (!children.length || !(children[children.length - 1] instanceof D.Paragraph)) children.push(new D.Paragraph(''));
+        return new D.TableCell({
+          children, columnSpan: +td.getAttribute('colspan') || undefined, rowSpan: +td.getAttribute('rowspan') || undefined,
+          width: slots ? { size: 520, type: D.WidthType.DXA } : wordWidth(td.getAttribute('width')),
+          margins: { top: 30, bottom: 30, left: 80, right: 80 }
+        });
+      });
+      return cells.length ? new D.TableRow({ children: cells }) : null;
+    }).filter(Boolean);
+    if (!rows.length) return null;
+    return new D.Table({
+      rows, borders: bordered ? undefined : D.TableBorders.NONE,
+      // ширины — из разметки (width="100%", width="40"); без них таблица во всю ширину, поле ответа — по клеткам
+      width: slots ? undefined : wordWidth(el.getAttribute('width')) || { size: 100, type: D.WidthType.PERCENTAGE }
+    });
+  }
+  function wordWidth(w) {
+    const D = window.docx;
+    if (!w) return undefined;
+    const m = /^\s*([\d.]+)\s*(%?)/.exec(w);
+    if (!m || !+m[1]) return undefined;
+    return m[2] ? { size: Math.min(100, +m[1]), type: D.WidthType.PERCENTAGE } : { size: Math.round(+m[1] * 15), type: D.WidthType.DXA };
+  }
+  function irToDocx(D, ir, imgs) {
+    return ir.map(x => (x.table ? irTable(D, x.table, x.f, imgs) : irParagraph(D, x.p, x.f, imgs))).filter(Boolean);
+  }
+  function htmlToDocx(D, html, imgs, f = {}) {
+    const root = document.createElement('div');
+    root.innerHTML = html;
+    const ir = [];
+    walkBlocks(root, f, ir);
+    return irToDocx(D, ir, imgs);
+  }
+  function downloadBlob(blob, name) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  }
+  // entries: [{ t, label }]; label — номер задания в файле.
+  async function exportWord(entries, title, fileName, btn) {
+    const old = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Готовлю Word…';
+    try {
+      const D = await loadDocx();
+      const seenTexts = new Set();
+      const parts = entries.map(e => {
+        const x = e.t.text_id && B.texts[e.t.text_id];
+        const text = x && !seenTexts.has(e.t.text_id) ? `<p><b>${esc(x.title || 'Текст')}</b></p>${fixMedia(x.html)}` : '';
+        if (x) seenTexts.add(e.t.text_id);
+        return { e, text, body: taskBody(e.t, { booklet: true }) };
+      });
+      const srcs = new Set();
+      parts.forEach(pt => (pt.text + pt.body).replace(/<img\b[^>]*?\ssrc="([^"]+)"/g, (_, s) => srcs.add(s.replace(/&amp;/g, '&'))));
+      const imgs = new Map();
+      let done = 0;
+      await Promise.all([...srcs].map(async s => {
+        imgs.set(s, await wordImage(s));
+        btn.textContent = `Готовлю Word… ${Math.round(++done / srcs.size * 100)}%`;
+      }));
+      const gray = (text, size = 18) => new D.TextRun({ text, color: '777777', size });
+      const children = [
+        new D.Paragraph({ children: [new D.TextRun({ text: title, bold: true, size: 32 })], spacing: { after: 60 } }),
+        new D.Paragraph({ children: [gray(`ОГЭ по физике · заданий: ${entries.length} · ${new Date().toLocaleDateString('ru-RU')} · ${location.host || 'банк заданий'}`)], spacing: { after: 240 } })
+      ];
+      parts.forEach(({ e, text, body }) => {
+        if (text) {
+          children.push(new D.Paragraph({ children: [new D.TextRun({ text: 'Прочитайте текст и выполните задания.', italics: true })], keepNext: true }));
+          children.push(...htmlToDocx(D, text, imgs));
+        }
+        const t = e.t;
+        children.push(new D.Paragraph({
+          children: [new D.TextRun({ text: `${e.label}. `, bold: true, size: 26 }), gray(`линия ${t.line_number ?? '?'} · ${t.id}`)],
+          keepNext: true, spacing: { before: 200, after: 60 }
+        }));
+        children.push(...htmlToDocx(D, body, imgs, { keep: true }));
+      });
+      // ответы — с новой страницы, чтобы лист с заданиями можно было напечатать отдельно
+      const cell = (s, b) => new D.TableCell({ children: [new D.Paragraph({ children: [new D.TextRun({ text: s, bold: b })] })], margins: { top: 30, bottom: 30, left: 80, right: 80 } });
+      children.push(new D.Paragraph({ children: [new D.TextRun({ text: 'Ответы', bold: true, size: 28 })], pageBreakBefore: true, spacing: { after: 120 } }));
+      children.push(new D.Table({
+        width: { size: 100, type: D.WidthType.PERCENTAGE },
+        rows: [new D.TableRow({ children: [cell('№', true), cell('Задание', true), cell('Ответ', true)], tableHeader: true })].concat(entries.map(e => {
+          const t = e.t;
+          const ans = isExtended(t) ? 'развёрнутый ответ' : t.answer ? displayAnswer(t) : '—';
+          return new D.TableRow({ children: [cell(String(e.label)), cell(t.id), cell(ans)] });
+        }))
+      }));
+      const doc = new D.Document({
+        creator: 'Банк заданий ОГЭ по физике', title,
+        styles: { default: { document: { run: { font: 'Times New Roman', size: 24 }, paragraph: { spacing: { line: 264 } } } } },
+        sections: [{ properties: { page: { margin: { top: 850, bottom: 850, left: 850, right: 850 } } }, children }]
+      });
+      downloadBlob(await D.Packer.toBlob(doc), fileName);
+    } catch (err) {
+      console.error(err);
+      alert('Не получилось собрать файл Word: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = old;
+    }
+  }
+  $('word').onclick = () => {
+    const list = picked.size ? [...picked].map(id => byId[id]).filter(Boolean) : shownList;
+    if (!list.length) { alert('Нет заданий: отберите задания в подборку или измените фильтры.'); return; }
+    if (!picked.size && list.length > 200) {
+      alert(`Найдено ${list.length} заданий — это слишком много для одного файла. Сузьте фильтры или отберите задания в подборку (не больше 200).`);
+      return;
+    }
+    if (list.length > 200 && !confirm(`В файл попадут ${list.length} заданий, сборка займёт около минуты. Продолжить?`)) return;
+    exportWord(list.map((t, i) => ({ t, label: i + 1 })), picked.size ? 'Подборка заданий' : 'Задания по фильтрам',
+      `oge-fizika-${picked.size ? 'podborka' : 'zadaniya'}-${list.length}.docx`, $('word'));
+  };
+  $('v-word').onclick = () => {
+    if (!variant) return;
+    const no = variantNo(variant.ids);
+    exportWord(variantTasks(variant.ids).filter(x => x.t).map(x => ({ t: x.t, label: x.line })), `Вариант № ${no}`, `oge-fizika-variant-${no}.docx`, $('v-word'));
+  };
 
   // ------------------------------------------------------------------ тренажёр
 
