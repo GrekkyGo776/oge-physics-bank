@@ -109,6 +109,16 @@ main { min-width: 0; }
 .badge.lv { color: var(--warn); }
 .badge.book { background: transparent; border: 1px dashed var(--line-strong); color: var(--muted); }
 .badge.demo { background: var(--accent-soft); border: 1px solid transparent; color: var(--accent); }
+.badge.sub { background: transparent; border: 1px solid var(--line-strong); color: var(--ink); }
+.badge.sub.auto { color: var(--muted); }
+#f-sub .chip::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px;
+  background: var(--sec, var(--s0)); vertical-align: 1px; }
+#f-sub .chip[data-sec="1"] { --sec: var(--s1); } #f-sub .chip[data-sec="2"] { --sec: var(--s2); }
+#f-sub .chip[data-sec="3"] { --sec: var(--s3); } #f-sub .chip[data-sec="4"] { --sec: var(--s4); }
+#f-sub .chip.on::before { background: currentColor; }
+/* семейство похожих заданий, показанное одной карточкой: «стопка» */
+.card.stacked { box-shadow: var(--shadow), 5px 5px 0 -1px var(--panel), 5px 5px 0 0 var(--line), 10px 10px 0 -1px var(--panel), 10px 10px 0 0 var(--line);
+  margin-right: 10px; margin-bottom: 26px; }
 .card-head .id { font-family: var(--mono); font-weight: 600; font-size: 12.5px; color: var(--muted); letter-spacing: .02em; }
 .card-head .grow { flex: 1; }
 .card-head a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line-strong); }
@@ -286,6 +296,10 @@ footer.foot a { color: inherit; }
     <input type="search" id="q" placeholder="Текст или номер задания (4D1B4F)">
     <h3>Раздел КЭС</h3>
     <div class="chips" id="f-section"></div>
+    <div id="f-sub-box">
+      <h3>Подраздел</h3>
+      <div class="chips" id="f-sub"></div>
+    </div>
     <h3>Тема КЭС</h3>
     <select id="f-topic"><option value="">Все темы</option></select>
     <h3>Тип ответа (ФИПИ)</h3>
@@ -318,6 +332,7 @@ footer.foot a { color: inherit; }
         <span class="count" id="count"></span>
         <span id="family-info"></span>
         <span class="spacer"></span>
+        <label class="check" title="Задания одного шаблона с разными числами или рисунками — одной карточкой; остальные открываются по ссылке «Похожие задания»"><input type="checkbox" id="group-fam"> похожие одной карточкой</label>
         <label class="check"><input type="checkbox" id="show-answers"> показывать ответы</label>
         <span id="picked-info"></span>
         <button class="btn" id="copy-picked">Скопировать номера подборки</button>
@@ -410,9 +425,9 @@ footer.foot a { color: inherit; }
     set(k, v) { try { localStorage.setItem('oge-phys:' + k, JSON.stringify(v)); } catch (e) { /* без хранилища — только в памяти */ } }
   };
   const state = {
-    q: '', sections: new Set(), topic: '', types: new Set(), kims: new Set(), parts: new Set(), family: null,
+    q: '', sections: new Set(), subs: new Set(), topic: '', types: new Set(), kims: new Set(), parts: new Set(), family: null,
     media: false, text: false, lv: false, picked: false, answer: false, demo: false, showAnswers: false, sort: 'kim', page: 1,
-    books: store.get('books', true)
+    books: store.get('books', true), groupFam: store.get('groupFam', true)
   };
   const picked = new Set(store.get('picked', []));
   let mode = 'bank';
@@ -458,6 +473,26 @@ footer.foot a { color: inherit; }
   }
   B.kes.forEach(s => chip($('f-section'), s.code, `${s.code}. ${s.title.charAt(0) + s.title.slice(1).toLowerCase()}`,
     count(t => t.kes_sections.some(x => x.code === s.code)), state.sections));
+  // Подразделы: промежуточный уровень между разделом и темой КЭС (meta.subsections). Видны подразделы
+  // выбранных разделов (без выбора — все); выбор подраздела сужает список тем.
+  const SUBS = B.meta.subsections || [];
+  const subTitle = {};
+  SUBS.forEach(s => { subTitle[s.id] = s.title; });
+  function renderSubChips() {
+    const box = $('f-sub');
+    box.innerHTML = '';
+    SUBS.forEach(s => {
+      if (state.sections.size && !state.sections.has(s.section)) { state.subs.delete(s.id); return; }
+      chip(box, s.id, esc(s.title), count(t => (t.subsections || []).includes(s.id)), state.subs);
+      box.lastChild.dataset.sec = s.section;
+      box.lastChild.title = 'Темы КЭС ' + s.topics.join(', ');
+      if (state.subs.has(s.id)) box.lastChild.classList.add('on');
+    });
+    $('f-sub-box').hidden = !SUBS.length;
+    narrowTopics();
+  }
+  $('f-section').addEventListener('click', () => { renderSubChips(); refresh(); });
+  $('f-sub').addEventListener('click', () => { narrowTopics(); refresh(); });
   TYPE_ORDER.forEach(ty => chip($('f-type'), ty, TYPE_SHORT[ty], count(t => t.answer_type === ty), state.types));
   for (const k of LINES) {
     const n = count(t => t.line_number === k);
@@ -479,26 +514,45 @@ footer.foot a { color: inherit; }
       const n = count(t => t.kes_codes.includes(tp.code));
       const o = document.createElement('option');
       o.value = tp.code; o.textContent = `${tp.code} ${tp.title.slice(0, 90)}${tp.title.length > 90 ? '…' : ''} (${n})`;
-      if (!n) o.disabled = true;
+      if (!n) { o.disabled = true; o.dataset.empty = '1'; }
       g.appendChild(o);
     });
     topicSel.appendChild(g);
   });
+
+  function narrowTopics() {
+    const allowed = state.subs.size ? new Set(SUBS.filter(s => state.subs.has(s.id)).flatMap(s => s.topics)) : null;
+    topicSel.querySelectorAll('optgroup').forEach(g => {
+      let any = false;
+      g.querySelectorAll('option').forEach(o => {
+        const show = !allowed || allowed.has(o.value);
+        o.hidden = !show;
+        o.disabled = !show || o.dataset.empty === '1';
+        any = any || show;
+      });
+      g.hidden = !any;
+    });
+    if (allowed && state.topic && !allowed.has(state.topic)) { state.topic = ''; topicSel.value = ''; }
+  }
+  renderSubChips();
 
   $('q').oninput = e => { state.q = e.target.value.trim().toLowerCase(); state.page = 1; refresh(); };
   topicSel.onchange = e => { state.topic = e.target.value; state.page = 1; refresh(); };
   ['media', 'text', 'lv', 'picked', 'answer', 'demo'].forEach(k => { $('f-' + k).onchange = e => { state[k] = e.target.checked; state.page = 1; refresh(); }; });
   $('f-books').checked = state.books;
   $('f-books').onchange = e => { state.books = e.target.checked; store.set('books', state.books); state.page = 1; refresh(); };
+  $('group-fam').checked = state.groupFam;
+  $('group-fam').onchange = e => { state.groupFam = e.target.checked; store.set('groupFam', state.groupFam); state.page = 1; renderBank(); };
   $('show-answers').onchange = e => { state.showAnswers = e.target.checked; renderBank(); };
   $('sort').onchange = e => { state.sort = e.target.value; refresh(); };
   $('toggle').onclick = () => $('filters').classList.toggle('open');
   $('reset').onclick = () => {
     Object.assign(state, { q: '', topic: '', family: null, media: false, text: false, lv: false, picked: false, answer: false, demo: false, page: 1 });
-    ['sections', 'types', 'kims', 'parts'].forEach(k => state[k].clear());
+    ['sections', 'subs', 'types', 'kims', 'parts'].forEach(k => state[k].clear());
     document.querySelectorAll('.chip.on').forEach(c => c.classList.remove('on'));
     $('q').value = ''; topicSel.value = '';
     ['media', 'text', 'lv', 'picked', 'answer', 'demo'].forEach(k => { $('f-' + k).checked = false; });
+    renderSubChips();
     refresh();
   };
   function setLineFilter(line) {
@@ -521,6 +575,7 @@ footer.foot a { color: inherit; }
     let list = B.tasks.filter(t => visible(t) &&
       (!q || t._search.includes(q)) &&
       (!state.sections.size || t.kes_sections.some(s => state.sections.has(s.code))) &&
+      (!state.subs.size || (t.subsections || []).some(s => state.subs.has(s))) &&
       (!state.topic || t.kes_codes.includes(state.topic)) &&
       (!state.types.size || state.types.has(t.answer_type)) &&
       (!state.kims.size || state.kims.has(t.line_number)) &&
@@ -560,7 +615,11 @@ footer.foot a { color: inherit; }
     const label = t.source === 'demo' ? `Демоверсия ${r.year} · №${r.number}` : `Было в демоверсии ${r.year}`;
     return `<span class="badge demo" title="Демоверсии ОГЭ: ${esc(all)}">${esc(label)}${t.demo_refs.length > 1 ? ` +${t.demo_refs.length - 1}` : ''}</span>`;
   }
-  const kesBadges = t => t.kes.map(k => `<span class="badge kes" title="${esc(k.title)}">КЭС ${esc(k.code || '?')}</span>`).join('');
+  const CONF_NAME = { high: 'высокая', medium: 'средняя' };
+  const subBadges = t => (t.subsections || []).map(s => t.subsection_inferred
+    ? `<span class="badge sub auto" title="Подраздел определён автоматически по тексту задания${t.subsection_confidence ? ` (уверенность: ${CONF_NAME[t.subsection_confidence] || t.subsection_confidence})` : ''}">≈ ${esc(subTitle[s] || s)}</span>`
+    : `<span class="badge sub" title="Подраздел по теме КЭС">${esc(subTitle[s] || s)}</span>`).join('');
+  const kesBadges = t => subBadges(t) + t.kes.map(k => `<span class="badge kes" title="${esc(k.title)}">КЭС ${esc(k.code || '?')}</span>`).join('');
   const optionsList = t => t.options.length && !t.scan
     ? `<ol class="opts">${t.options.map(o => `<li><b>${esc(o.n)})</b><div>${fixMedia(o.html)}</div></li>`).join('')}</ol>` : '';
   const slotsTable = (t, cells) => `<table class="slots"><tr>${t.answer_slots.map(s => `<td>${esc(s)}</td>`).join('')}</tr><tr>${cells}</tr></table>`;
@@ -629,11 +688,25 @@ footer.foot a { color: inherit; }
 
   // ------------------------------------------------------------------ банк
 
+  // Похожие одной карточкой: от каждого семейства в списке остаётся первое задание.
+  function groupFamilies(list) {
+    const hidden = {}, seen = new Set(), out = [];
+    list.forEach(t => {
+      if (!t.family_id) { out.push(t); return; }
+      if (seen.has(t.family_id)) { hidden[t.family_id] = (hidden[t.family_id] || 0) + 1; return; }
+      seen.add(t.family_id);
+      out.push(t);
+    });
+    return { out, hidden };
+  }
+  let famHidden = {};
+
   function card(t) {
     const kimTitle = KIM.plan[t.line_number] || '';
     const others = t.family_id ? (familyCount[t.family_id] || 1) - 1 : 0;
     const meta = Object.assign({}, t); delete meta.content_html; delete meta._search; delete meta._site;
-    return `<article class="card" data-sec="${secOf(t)}">
+    const stacked = !state.family && famHidden[t.family_id] > 0;
+    return `<article class="card${stacked ? ' stacked' : ''}" data-sec="${secOf(t)}">
       <div class="card-head">
         <span class="id">${esc(t.id)}</span>
         <span class="badge kim" title="${esc(kimTitle)}">Линия ${t.line_number ?? '?'}</span>
@@ -656,11 +729,14 @@ footer.foot a { color: inherit; }
   }
 
   function renderBank() {
-    const list = filtered();
+    const found = filtered();
+    let list = found;
+    famHidden = {};
+    if (state.groupFam && !state.family) ({ out: list, hidden: famHidden } = groupFamilies(found));
     const pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
     state.page = Math.min(state.page, pages);
     const slice = list.slice((state.page - 1) * PER_PAGE, state.page * PER_PAGE);
-    $('count').textContent = `Найдено: ${list.length}`;
+    $('count').textContent = `Найдено: ${found.length}` + (list.length < found.length ? ` · карточек: ${list.length}` : '');
     $('family-info').innerHTML = state.family
       ? `<span class="family-chip">Похожие задания к ${esc(state.familyFrom || '')} — фильтры не действуют <button class="btn small" id="family-off">Вернуться к фильтрам</button></span>` : '';
     if (state.family) $('family-off').onclick = () => { state.family = null; state.page = 1; renderBank(); };
@@ -812,6 +888,7 @@ footer.foot a { color: inherit; }
   function candidatesFor(line, onlyAnswered) {
     let c = (byLine[line] || []).filter(visible);
     if (state.sections.size) c = c.filter(t => t.kes_sections.some(s => state.sections.has(s.code)));
+    if (state.subs.size) c = c.filter(t => (t.subsections || []).some(s => state.subs.has(s)));
     if (line === 18) { const withText = c.filter(t => t.text_id); if (withText.length) c = withText; }
     if (onlyAnswered) { const a = c.filter(t => t.answer); if (a.length) c = a; }
     return c;
@@ -831,9 +908,9 @@ footer.foot a { color: inherit; }
     store.set('variant', variant);
     history.replaceState(null, '', '#variant=' + variant.ids.join(','));
   }
-  const sectionsNote = () => state.sections.size
+  const sectionsNote = () => (state.sections.size
     ? 'разделы КЭС: ' + [...state.sections].sort().map(c => `${c}. ${kesTitle[c].charAt(0) + kesTitle[c].slice(1).toLowerCase()}`).join('; ')
-    : 'разделы КЭС: все';
+    : 'разделы КЭС: все') + (state.subs.size ? '; подразделы: ' + [...state.subs].sort().map(s => subTitle[s]).join('; ') : '');
   const variantTasks = ids => ids.map((id, i) => ({ line: i + 1, id, t: id ? byId[id] : null }));
 
   function renderVariantInfo() {
