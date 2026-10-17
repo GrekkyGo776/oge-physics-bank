@@ -145,11 +145,12 @@ main { min-width: 0; }
 .task table.matching { width: 100%; } .task table.matching > tbody > tr > td, .task table.matching > tbody > tr > th { width: 50%; vertical-align: top; text-align: left; }
 .demo-reading { border-left: 3px solid var(--line-strong); padding-left: 12px; margin-bottom: 12px; }
 .badge.sub.auto { color: var(--muted); }
-#f-sub .chip::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px;
+#f-sub .chip::before, #f-theme .chip::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px;
   background: var(--sec, var(--s0)); vertical-align: 1px; }
-#f-sub .chip[data-sec="1"] { --sec: var(--s1); } #f-sub .chip[data-sec="2"] { --sec: var(--s2); }
-#f-sub .chip[data-sec="3"] { --sec: var(--s3); } #f-sub .chip[data-sec="4"] { --sec: var(--s4); }
-#f-sub .chip.on::before { background: currentColor; }
+.chip[data-sec="1"] { --sec: var(--s1); } .chip[data-sec="2"] { --sec: var(--s2); }
+.chip[data-sec="3"] { --sec: var(--s3); } .chip[data-sec="4"] { --sec: var(--s4); }
+#f-sub .chip.on::before, #f-theme .chip.on::before { background: currentColor; }
+#f-theme .chip::before { width: 6px; height: 6px; border-radius: 2px; }
 /* семейство похожих заданий, показанное одной карточкой: «стопка» */
 .card.stacked { box-shadow: var(--shadow), 5px 5px 0 -1px var(--panel), 5px 5px 0 0 var(--line), 10px 10px 0 -1px var(--panel), 10px 10px 0 0 var(--line);
   margin-right: 10px; margin-bottom: 26px; }
@@ -335,13 +336,17 @@ footer.foot a { color: inherit; }
       <h3>Подраздел</h3>
       <div class="chips" id="f-sub"></div>
     </div>
-    <h3>Тема КЭС</h3>
+    <div id="f-theme-box">
+      <h3>Тема</h3>
+      <div class="chips" id="f-theme"></div>
+    </div>
+    <h3>КЭС</h3>
     <details class="pick-list" id="f-topic-box">
-      <summary id="f-topic-sum">Все темы</summary>
+      <summary id="f-topic-sum">Все пункты КЭС</summary>
       <div class="pl-body">
-        <input type="search" id="f-topic-q" placeholder="Найти тему: «линза», «2.3»">
+        <input type="search" id="f-topic-q" placeholder="Найти пункт КЭС: «линза», «2.3»">
         <div class="pl-list" id="f-topic"></div>
-        <div class="pl-actions"><span>Можно выбрать несколько тем</span><button type="button" id="f-topic-clear">Снять все</button></div>
+        <div class="pl-actions"><span>Можно выбрать несколько пунктов</span><button type="button" id="f-topic-clear">Снять все</button></div>
       </div>
     </details>
     <h3>Тип ответа (ФИПИ)</h3>
@@ -379,6 +384,7 @@ footer.foot a { color: inherit; }
         <span id="picked-info"></span>
         <button class="btn" id="pick-all" title="Добавить в подборку все задания, которые сейчас видны в списке (на всех страницах)">Выбрать все найденные</button>
         <button class="btn" id="copy-picked">Скопировать номера подборки</button>
+        <button class="btn" id="to-tetrad" hidden title="Открыть «Тетрадь» и положить задания в подборку к уроку или на дом: подборка, а если она пуста — найденные задания">📚 В Тетрадь</button>
         <button class="btn" id="clear-picked">Очистить подборку</button>
         <button class="btn" id="word" title="Файл Word (.docx): подборка, а если она пуста — найденные задания; в конце — таблица ответов">Скачать Word</button>
         <button class="btn primary" id="print">Печать</button>
@@ -470,10 +476,10 @@ footer.foot a { color: inherit; }
     set(k, v) { try { localStorage.setItem('oge-phys:' + k, JSON.stringify(v)); } catch (e) { /* без хранилища — только в памяти */ } }
   };
   const state = {
-    q: '', sections: new Set(), subs: new Set(), topics: new Set(), types: new Set(), kims: new Set(), parts: new Set(), src: new Set(),
+    q: '', sections: new Set(), subs: new Set(), themes: new Set(), topics: new Set(), types: new Set(), kims: new Set(), parts: new Set(), src: new Set(),
     family: null,
     // исключённые значения тех же фильтров (второй щелчок по метке)
-    out: { sections: new Set(), subs: new Set(), topics: new Set(), types: new Set(), kims: new Set(), parts: new Set(), src: new Set() },
+    out: { sections: new Set(), subs: new Set(), themes: new Set(), topics: new Set(), types: new Set(), kims: new Set(), parts: new Set(), src: new Set() },
     media: false, text: false, lv: false, picked: false, answer: false, showAnswers: false, sort: 'kim', page: 1,
     groupFam: store.get('groupFam', true)
   };
@@ -558,10 +564,31 @@ footer.foot a { color: inherit; }
       box.lastChild.title = 'Темы КЭС ' + s.topics.join(', ');
     });
     $('f-sub-box').hidden = !SUBS.length;
+    renderThemeChips();
     narrowTopics();
   }
+  // Темы: уровень между подразделом и пунктом КЭС (meta.themes), у задания не больше одной темы.
+  // Видны темы показанных подразделов (выбраны подразделы — только их).
+  const THEMES = B.meta.themes || [];
+  const themeTitle = {}, subOfTheme = {}, secOfSub = {};
+  THEMES.forEach(th => { themeTitle[th.id] = th.title; subOfTheme[th.id] = th.subsection; });
+  SUBS.forEach(s => { secOfSub[s.id] = s.section; });
+  function renderThemeChips() {
+    const box = $('f-theme');
+    box.innerHTML = '';
+    THEMES.forEach(th => {
+      const s = th.subsection, sec = secOfSub[s];
+      const shown = !(state.sections.size && !state.sections.has(sec)) && !state.out.sections.has(sec) &&
+        !(state.subs.size && !state.subs.has(s)) && !state.out.subs.has(s);
+      if (!shown) { state.themes.delete(th.id); state.out.themes.delete(th.id); return; }
+      chip(box, th.id, esc(th.title), count(t => t.theme === th.id), 'themes');
+      box.lastChild.dataset.sec = sec;
+      box.lastChild.title = subTitle[s] + (th.topics.length ? ' · КЭС ' + th.topics.join(', ') : '');
+    });
+    $('f-theme-box').hidden = !box.children.length;
+  }
   $('f-section').addEventListener('click', () => { renderSubChips(); refresh(); });
-  $('f-sub').addEventListener('click', () => { narrowTopics(); refresh(); });
+  $('f-sub').addEventListener('click', () => { renderThemeChips(); narrowTopics(); refresh(); });
   TYPE_ORDER.forEach(ty => chip($('f-type'), ty, TYPE_SHORT[ty], count(t => t.answer_type === ty), 'types'));
   for (const k of LINES) {
     const n = count(t => t.line_number === k);
@@ -590,7 +617,7 @@ footer.foot a { color: inherit; }
     $('f-src').lastChild.title = title + '. Щелчок — только они, второй щелчок — без них.';
   });
 
-  // Темы КЭС: список с поиском, можно выбрать и исключить несколько тем (те же три состояния, что у меток).
+  // Пункты КЭС (темы кодификатора): список с поиском, можно выбрать и исключить несколько (те же три состояния, что у меток).
   const topicList = $('f-topic');
   const topicTitle = {};
   B.kes.forEach(s => {
@@ -620,7 +647,7 @@ footer.foot a { color: inherit; }
     const parts = [];
     if (inc.length) parts.push((inc.length === 1 ? `${inc[0]} ${topicTitle[inc[0]] || ''}`.slice(0, 60) : 'выбрано: ' + inc.join(', ')));
     if (exc.length) parts.push('без ' + exc.join(', '));
-    $('f-topic-sum').textContent = parts.length ? parts.join('; ') : 'Все темы';
+    $('f-topic-sum').textContent = parts.length ? parts.join('; ') : 'Все пункты КЭС';
     $('f-topic-sum').title = parts.join('; ');
   }
   function narrowTopics() {
@@ -652,7 +679,7 @@ footer.foot a { color: inherit; }
   $('toggle').onclick = () => $('filters').classList.toggle('open');
   $('reset').onclick = () => {
     Object.assign(state, { q: '', family: null, media: false, text: false, lv: false, picked: false, answer: false, page: 1 });
-    ['sections', 'subs', 'topics', 'types', 'kims', 'parts', 'src'].forEach(k => { state[k].clear(); state.out[k].clear(); });
+    ['sections', 'subs', 'themes', 'topics', 'types', 'kims', 'parts', 'src'].forEach(k => { state[k].clear(); state.out[k].clear(); });
     document.querySelectorAll('.chip.on, .chip.out').forEach(c => { c.classList.remove('on', 'out'); c.setAttribute('aria-pressed', 'false'); });
     $('q').value = ''; $('f-topic-q').value = '';
     ['media', 'text', 'lv', 'picked', 'answer'].forEach(k => { $('f-' + k).checked = false; });
@@ -681,6 +708,17 @@ footer.foot a { color: inherit; }
     renderBank();
   };
   $('copy-picked').onclick = () => copyText([...picked].join(', '), 'Номера заданий:');
+  // «В Тетрадь» (tetrad.fizmat.guru — кабинет репетитора): там выбирают подборку и раздел «на уроке» / «на дом».
+  // Кнопка видна только на oge.fizmat.guru — у остальных копий банка «Тетради» нет.
+  const TETRAD = 'https://tetrad.fizmat.guru';
+  const TETRAD_MAX = 400;
+  if (/(^|\.)fizmat\.guru$/.test(location.hostname) || location.hostname === 'localhost') $('to-tetrad').hidden = false;
+  $('to-tetrad').onclick = () => {
+    const ids = picked.size ? [...picked] : shownList.map(t => t.id);
+    if (!ids.length) { alert('Отметьте задания или найдите их фильтрами'); return; }
+    if (ids.length > TETRAD_MAX) { alert(`За раз — не больше ${TETRAD_MAX} заданий, а сейчас ${ids.length}. Сузьте фильтры или отметьте нужные.`); return; }
+    window.open(`${TETRAD}/dashboard/sets/import?ids=${encodeURIComponent(ids.join(','))}`, '_blank', 'noopener');
+  };
 
   const kesKey = t => (t.kes_codes[0] || '9').split('.').map(x => x.padStart(3, '0')).join('.');
   // Фильтр источника действует везде: в списке, тренажёре, вариантах и экзамене.
@@ -694,6 +732,7 @@ footer.foot a { color: inherit; }
       (!q || t._search.includes(q)) &&
       passes('sections', t.kes_sections.map(s => s.code)) &&
       passes('subs', t.subsections || []) &&
+      passes('themes', t.theme ? [t.theme] : []) &&
       passes('topics', t.kes_codes) &&
       passes('types', [t.answer_type]) &&
       passes('kims', [t.line_number]) &&
@@ -733,9 +772,15 @@ footer.foot a { color: inherit; }
     return `<span class="badge demo" title="Демоверсии ОГЭ: ${esc(all)}">${esc(label)}${t.demo_refs.length > 1 ? ` +${t.demo_refs.length - 1}` : ''}</span>`;
   }
   const CONF_NAME = { high: 'высокая', medium: 'средняя' };
-  const subBadges = t => (t.subsections || []).map(s => t.subsection_inferred
-    ? `<span class="badge sub auto" title="Подраздел определён автоматически по тексту задания${t.subsection_confidence ? ` (уверенность: ${CONF_NAME[t.subsection_confidence] || t.subsection_confidence})` : ''}">≈ ${esc(subTitle[s] || s)}</span>`
-    : `<span class="badge sub" title="Подраздел по теме КЭС">${esc(subTitle[s] || s)}</span>`).join('');
+  const subBadges = t => (t.subsections || []).map(s => {
+    const th = t.theme && subOfTheme[t.theme] === s ? t.theme : null;
+    const auto = t.subsection_inferred || (th && t.theme_inferred);
+    const title = (t.subsection_inferred ? 'Подраздел определён автоматически по тексту задания' +
+      (t.subsection_confidence ? ` (уверенность: ${CONF_NAME[t.subsection_confidence] || t.subsection_confidence})` : '') : 'Подраздел по пункту КЭС') +
+      (th ? (t.theme_inferred ? '; тема определена автоматически по тексту задания' : '; тема по пункту КЭС') : '');
+    const label = esc(subTitle[s] || s) + (th ? ` · ${t.theme_inferred && !t.subsection_inferred ? '≈ ' : ''}${esc(themeTitle[th])}` : '');
+    return `<span class="badge sub${auto ? ' auto' : ''}" title="${title}">${t.subsection_inferred ? '≈ ' : ''}${label}</span>`;
+  }).join('');
   const kesBadges = t => subBadges(t) + t.kes.map(k => `<span class="badge kes" title="${esc(k.title)}">КЭС ${esc(k.code || '?')}</span>`).join('');
   // Варианты ответа нарисованы на картинке (скан задания или рисунок с подписями «1)»…«4)») — в поле ответа только номера.
   const optsInPicture = t => t.scan || t.options_in_figure;
@@ -1008,7 +1053,8 @@ footer.foot a { color: inherit; }
 
   function candidatesFor(line, onlyAnswered) {
     let c = (byLine[line] || []).filter(visible);
-    c = c.filter(t => passes('sections', t.kes_sections.map(s => s.code)) && passes('subs', t.subsections || []));
+    c = c.filter(t => passes('sections', t.kes_sections.map(s => s.code)) && passes('subs', t.subsections || []) &&
+      passes('themes', t.theme ? [t.theme] : []));
     if (line === 18) { const withText = c.filter(t => t.text_id); if (withText.length) c = withText; }
     if (onlyAnswered) { const a = c.filter(t => t.answer); if (a.length) c = a; }
     return c;
@@ -1032,7 +1078,9 @@ footer.foot a { color: inherit; }
   const sectionsNote = () => (state.sections.size ? 'разделы КЭС: ' + [...state.sections].sort().map(secName).join('; ') : 'разделы КЭС: все') +
     (state.out.sections.size ? '; кроме разделов: ' + [...state.out.sections].sort().map(secName).join('; ') : '') +
     (state.subs.size ? '; подразделы: ' + [...state.subs].sort().map(s => subTitle[s]).join('; ') : '') +
-    (state.out.subs.size ? '; кроме подразделов: ' + [...state.out.subs].sort().map(s => subTitle[s]).join('; ') : '');
+    (state.out.subs.size ? '; кроме подразделов: ' + [...state.out.subs].sort().map(s => subTitle[s]).join('; ') : '') +
+    (state.themes.size ? '; темы: ' + [...state.themes].sort().map(s => themeTitle[s]).join('; ') : '') +
+    (state.out.themes.size ? '; кроме тем: ' + [...state.out.themes].sort().map(s => themeTitle[s]).join('; ') : '');
   const variantTasks = ids => ids.map((id, i) => ({ line: i + 1, id, t: id ? byId[id] : null }));
 
   function renderVariantInfo() {
