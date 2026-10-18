@@ -358,10 +358,7 @@ footer.foot a { color: inherit; }
     <h3>Источник заданий</h3>
     <div class="chips" id="f-src"></div>
     <h3>Прочее</h3>
-    <label class="check"><input type="checkbox" id="f-media"> только с рисунками</label>
-    <label class="check"><input type="checkbox" id="f-text"> только к тексту</label>
-    <label class="check"><input type="checkbox" id="f-answer"> только с ответом</label>
-    <label class="check"><input type="checkbox" id="f-lv"> для слабовидящих</label>
+    <div class="chips" id="f-flags"></div>
     <label class="check"><input type="checkbox" id="f-picked"> только подборка</label>
     <h3>Сортировка</h3>
     <select id="sort">
@@ -480,8 +477,8 @@ footer.foot a { color: inherit; }
     q: '', sections: new Set(), subs: new Set(), themes: new Set(), topics: new Set(), types: new Set(), kims: new Set(), parts: new Set(), src: new Set(),
     family: null,
     // исключённые значения тех же фильтров (второй щелчок по метке)
-    out: { sections: new Set(), subs: new Set(), themes: new Set(), topics: new Set(), types: new Set(), kims: new Set(), parts: new Set(), src: new Set() },
-    media: false, text: false, lv: false, picked: false, answer: false, showAnswers: false, sort: 'kim', page: 1,
+    out: { sections: new Set(), subs: new Set(), themes: new Set(), topics: new Set(), types: new Set(), kims: new Set(), parts: new Set(), src: new Set(), flags: new Set() },
+    flags: new Set(), picked: false, showAnswers: false, sort: 'kim', page: 1,
     groupFam: store.get('groupFam', true)
   };
   const picked = new Set(store.get('picked', []));
@@ -599,6 +596,21 @@ footer.foot a { color: inherit; }
   }
   chip($('f-part'), 1, 'Краткий ответ (1–16)', count(t => t.part === 1), 'parts');
   chip($('f-part'), 2, 'Развёрнутый (17–22)', count(t => t.part === 2), 'parts');
+  // «Прочее»: признаки задания. Выбранный признак — задание должно его иметь, исключённый — не иметь
+  // (все условия вместе: «с рисунком» и «без ответа» — задания с рисунком и без ответа).
+  // Рисунок у заданий-сканов найден по изображению; где он неизвестен, задание не попадает ни в «с», ни в «без».
+  const FLAGS = {
+    fig: { label: 'с рисунком', title: 'Щелчок — только с рисунком, второй щелчок — без рисунка', has: t => t.has_figure === true, no: t => t.has_figure === false },
+    text: { label: 'к тексту', title: 'Щелчок — только задания к тексту для чтения, второй щелчок — без них', has: t => !!t.text_id },
+    answer: { label: 'с ответом', title: 'Щелчок — только с ответом, второй щелчок — без ответа', has: t => !!t.answer },
+    lv: { label: 'для слабовидящих', title: 'Щелчок — только подходящие для слабовидящих, второй щелчок — без них', has: t => !!t.low_vision },
+  };
+  const flagsPass = t => [...state.flags].every(k => FLAGS[k].has(t)) &&
+    [...state.out.flags].every(k => (FLAGS[k].no || (x => !FLAGS[k].has(x)))(t));
+  Object.entries(FLAGS).forEach(([k, f]) => {
+    chip($('f-flags'), k, f.label, count(f.has), 'flags');
+    $('f-flags').lastChild.title = f.title;
+  });
   // Источник: открытый банк ФИПИ, демоверсии ФИПИ, сборники. Задание банка, которое было в демоверсии или есть
   // в сборнике, относится и к ним. Ничего не выбрано — видны задания всех источников.
   const srcOf = t => {
@@ -672,7 +684,7 @@ footer.foot a { color: inherit; }
   renderSubChips();
 
   $('q').oninput = e => { state.q = e.target.value.trim().toLowerCase(); state.page = 1; refresh(); };
-  ['media', 'text', 'lv', 'picked', 'answer'].forEach(k => { $('f-' + k).onchange = e => { state[k] = e.target.checked; state.page = 1; refresh(); }; });
+  $('f-picked').onchange = e => { state.picked = e.target.checked; state.page = 1; refresh(); };
   let sortBeforePicked = null;
   $('f-picked').addEventListener('change', e => {
     if (e.target.checked && state.sort !== 'picked') { sortBeforePicked = state.sort; state.sort = 'picked'; }
@@ -686,11 +698,11 @@ footer.foot a { color: inherit; }
   $('sort').onchange = e => { state.sort = e.target.value; refresh(); };
   $('toggle').onclick = () => $('filters').classList.toggle('open');
   $('reset').onclick = () => {
-    Object.assign(state, { q: '', family: null, media: false, text: false, lv: false, picked: false, answer: false, page: 1 });
-    ['sections', 'subs', 'themes', 'topics', 'types', 'kims', 'parts', 'src'].forEach(k => { state[k].clear(); state.out[k].clear(); });
+    Object.assign(state, { q: '', family: null, picked: false, page: 1 });
+    ['sections', 'subs', 'themes', 'topics', 'types', 'kims', 'parts', 'src', 'flags'].forEach(k => { state[k].clear(); state.out[k].clear(); });
     document.querySelectorAll('.chip.on, .chip.out').forEach(c => { c.classList.remove('on', 'out'); c.setAttribute('aria-pressed', 'false'); });
     $('q').value = ''; $('f-topic-q').value = '';
-    ['media', 'text', 'lv', 'picked', 'answer'].forEach(k => { $('f-' + k).checked = false; });
+    $('f-picked').checked = false;
     renderSubChips();
     refresh();
   };
@@ -758,10 +770,7 @@ footer.foot a { color: inherit; }
       passes('types', [t.answer_type]) &&
       passes('kims', [t.line_number]) &&
       passes('parts', [t.part]) &&
-      (!state.media || t.media.length) &&
-      (!state.text || t.text_id) &&
-      (!state.lv || t.low_vision) &&
-      (!state.answer || t.answer) &&
+      flagsPass(t) &&
       (!state.picked || picked.has(t.id))
     );
     const cmp = {
@@ -905,7 +914,7 @@ footer.foot a { color: inherit; }
         ${t.low_vision ? '<span class="badge lv" title="Возможно использование для слабовидящих">👁</span>' : ''}
         <span class="grow"></span>
         ${others > 0 && state.family !== t.family_id ? `<a href="#bank" data-family="${esc(t.family_id)}" data-from="${esc(t.id)}">Похожие задания (${others})</a>` : ''}
-        ${!t.scan && t.scan_media && t.scan_media.length ? `<a href="${MEDIA}${esc(t.scan_media[0].local)}" target="_blank" rel="noopener" title="Задание в том виде, как оно напечатано в демоверсии">оригинал</a>` : ''}
+        ${!t.scan && t.scan_media && t.scan_media.length ? `<a href="${MEDIA}${esc(t.scan_media[0].local)}" target="_blank" rel="noopener" title="Задание в том виде, как оно напечатано в источнике (скан)">оригинал</a>` : ''}
         ${t.source_url ? `<a href="${esc(t.source_url)}" target="_blank" rel="noopener">ФИПИ</a>` : '<span class="src-book">сборник</span>'}
         <label><input type="checkbox" data-pick="${esc(t.id)}" ${picked.has(t.id) ? 'checked' : ''}> в подборку</label>
       </div>
