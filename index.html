@@ -369,6 +369,7 @@ footer.foot a { color: inherit; }
       <option value="kes">по КЭС</option>
       <option value="id">по номеру ФИПИ</option>
       <option value="site">как на сайте ФИПИ</option>
+      <option value="picked">в порядке подборки</option>
     </select>
     <div class="row"><button class="btn" id="reset">Сбросить фильтры</button></div>
     <p class="note" id="filters-note"></p>
@@ -672,6 +673,13 @@ footer.foot a { color: inherit; }
 
   $('q').oninput = e => { state.q = e.target.value.trim().toLowerCase(); state.page = 1; refresh(); };
   ['media', 'text', 'lv', 'picked', 'answer'].forEach(k => { $('f-' + k).onchange = e => { state[k] = e.target.checked; state.page = 1; refresh(); }; });
+  let sortBeforePicked = null;
+  $('f-picked').addEventListener('change', e => {
+    if (e.target.checked && state.sort !== 'picked') { sortBeforePicked = state.sort; state.sort = 'picked'; }
+    else if (!e.target.checked && state.sort === 'picked' && sortBeforePicked) { state.sort = sortBeforePicked; sortBeforePicked = null; }
+    $('sort').value = state.sort;
+    refresh();
+  });
   $('group-fam').checked = state.groupFam;
   $('group-fam').onchange = e => { state.groupFam = e.target.checked; store.set('groupFam', state.groupFam); state.page = 1; renderBank(); };
   $('show-answers').onchange = e => { state.showAnswers = e.target.checked; renderBank(); };
@@ -691,8 +699,17 @@ footer.foot a { color: inherit; }
     if (line) state.kims.add(line);
     $('f-kim').querySelectorAll('.chip').forEach(c => paintFilter(c, 'kims', +c.dataset.value));
   }
-  $('print').onclick = () => window.print();
-  $('clear-picked').onclick = () => { picked.clear(); store.set('picked', []); renderBank(); };
+  // печать — все найденные карточки, а не только текущая страница
+  let printAll = false;
+  $('print').onclick = () => {
+    const n = shownList.length;
+    if (n > 300 && !confirm(`На печать уйдут все ${n} заданий. Продолжить?`)) return;
+    printAll = true;
+    renderBank();
+    window.print();
+  };
+  window.addEventListener('afterprint', () => { if (printAll) { printAll = false; renderBank(); } });
+  $('clear-picked').onclick = () => { picked.clear(); pickedCache = null; store.set('picked', []); renderBank(); };
   // «Выбрать все найденные»: все карточки текущего списка (на всех страницах); если все уже в подборке — убрать их.
   let shownList = [];
   function updatePickAll() {
@@ -704,6 +721,7 @@ footer.foot a { color: inherit; }
   $('pick-all').onclick = () => {
     const all = shownList.every(t => picked.has(t.id));
     shownList.forEach(t => (all ? picked.delete(t.id) : picked.add(t.id)));
+    pickedCache = null;
     store.set('picked', [...picked]);
     renderBank();
   };
@@ -720,6 +738,9 @@ footer.foot a { color: inherit; }
     window.open(`${TETRAD}/dashboard/sets/import?ids=${encodeURIComponent(ids.join(','))}`, '_blank', 'noopener');
   };
 
+  const pickPos = t => { const i = pickedOrder().indexOf(t.id); return i < 0 ? 1e9 : i; };
+  let pickedCache = null;
+  const pickedOrder = () => pickedCache || (pickedCache = [...picked]);
   const kesKey = t => (t.kes_codes[0] || '9').split('.').map(x => x.padStart(3, '0')).join('.');
   // Фильтр источника действует везде: в списке, тренажёре, вариантах и экзамене.
   const visible = t => passes('src', srcOf(t));
@@ -747,7 +768,9 @@ footer.foot a { color: inherit; }
       kim: (a, b) => (a.line_number || 99) - (b.line_number || 99) || kesKey(a).localeCompare(kesKey(b)),
       kes: (a, b) => kesKey(a).localeCompare(kesKey(b)) || (a.line_number || 99) - (b.line_number || 99),
       id: (a, b) => a.id.localeCompare(b.id),
-      site: (a, b) => a._site - b._site
+      site: (a, b) => a._site - b._site,
+      // в том порядке, в каком задания отмечали «в подборку»; не отмеченные — после них, по номеру линии
+      picked: (a, b) => (pickPos(a) - pickPos(b)) || (a.line_number || 99) - (b.line_number || 99)
     }[state.sort];
     return list.sort(cmp);
   }
@@ -897,10 +920,11 @@ footer.foot a { color: inherit; }
     const found = filtered();
     let list = found;
     famHidden = {};
-    if (state.groupFam && !state.family) ({ out: list, hidden: famHidden } = groupFamilies(found));
+    // в режиме «только подборка» похожие не сворачиваются: отмеченное задание не должно прятаться за другим
+    if (state.groupFam && !state.family && !state.picked) ({ out: list, hidden: famHidden } = groupFamilies(found));
     const pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
     state.page = Math.min(state.page, pages);
-    const slice = list.slice((state.page - 1) * PER_PAGE, state.page * PER_PAGE);
+    const slice = printAll ? list : list.slice((state.page - 1) * PER_PAGE, state.page * PER_PAGE);
     $('count').textContent = `Найдено: ${found.length}` + (list.length < found.length ? ` · карточек: ${list.length}` : '');
     $('family-info').innerHTML = state.family
       ? `<span class="family-chip">Похожие задания к ${esc(state.familyFrom || '')} — фильтры не действуют <button class="btn small" id="family-off">Вернуться к фильтрам</button></span>` : '';
@@ -909,7 +933,7 @@ footer.foot a { color: inherit; }
     updatePickAll();
     $('list').innerHTML = slice.length ? slice.map(card).join('') : '<div class="empty">Ничего не найдено</div>';
     $('list').querySelectorAll('[data-pick]').forEach(cb => {
-      cb.onchange = () => { cb.checked ? picked.add(cb.dataset.pick) : picked.delete(cb.dataset.pick); store.set('picked', [...picked]); updatePickAll(); };
+      cb.onchange = () => { cb.checked ? picked.add(cb.dataset.pick) : picked.delete(cb.dataset.pick); pickedCache = null; store.set('picked', [...picked]); updatePickAll(); };
     });
     $('list').querySelectorAll('[data-family]').forEach(a => {
       a.onclick = e => { e.preventDefault(); state.family = a.dataset.family; state.familyFrom = a.dataset.from; state.page = 1; renderBank(); window.scrollTo(0, 0); };
